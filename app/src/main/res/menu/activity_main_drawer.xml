@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:id="@+id/menu_home_group">
+        <item
+            android:icon="@drawable/ic_home_white_24px"
+            android:title="Home" />
+    </group>
+
+    <group android:id="@+id/menu_documents_group">
+        <item
+            android:title="Todo.org" />
+        <item
+            android:title="Homework.org" />
+    </group>
+
+    <group android:id="@+id/menu_settings_group">
+        <item
+            android:icon="@drawable/ic_settings_white_24px"
+            android:title="Settings" />
+    </group>
+
+</menu>

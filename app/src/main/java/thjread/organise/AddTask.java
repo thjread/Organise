@@ -42,7 +42,7 @@ public class AddTask extends DialogFragment {
 
         simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
-        View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_add_task, null);
+        View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_add_task, null, false);
         view.setPadding(19, 5, 14, 5); //Magic padding values
         builder.setView(view);
 

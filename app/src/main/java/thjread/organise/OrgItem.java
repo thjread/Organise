@@ -1,5 +1,7 @@
 package thjread.organise;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,7 +21,7 @@ public class OrgItem {
 
     public OrgItem(HashMap<String, Integer> keywords) {
         this.keywords = keywords;
-
+        children = new ArrayList<OrgItem>();
     }
     
     public OrgItem(HashMap<String, Integer> keywords, String title, Date scheduled,
@@ -31,6 +33,7 @@ public class OrgItem {
         this.done = done;
         this.keyword = keyword;
         this.treeLevel = treeLevel;
+        children = new ArrayList<OrgItem>();
     }
 
     public void addChild(OrgItem child) {
@@ -51,12 +54,32 @@ public class OrgItem {
         while (!file.isEmpty() && parseSection(file.peekLine())) {
             file.removeLine();
         }
+
+        while (!file.isEmpty()) {
+            String[] tokens = tokenise(file.peekLine());
+            if (tokens.length != 0) {
+                int stars = starNum(tokens[0]);
+                if (stars > treeLevel) {
+                    OrgItem item = new OrgItem(keywords);
+                    item.parse(file);
+                    this.addChild(item);
+                } else {
+                    return true;
+                }
+            } else {
+                file.removeLine();
+            }
+        }
+
         return true;
     }
 
     private boolean parseFirstLine(String line) {
-        String[] tokens = line.split("\\s+");
+        String[] tokens = tokenise(line);
         int tokenPointer = 0;
+        if (tokens.length == 0) {
+            return false;
+        }
 
         if (parseStars(tokens[tokenPointer], true)) {
             tokenPointer++;
@@ -72,11 +95,6 @@ public class OrgItem {
             keyword = -1;
         }
 
-        if (parsePriority(tokens[tokenPointer])) {
-            tokenPointer++;
-            if (tokenPointer >= tokens.length) return false;
-        }
-
         title = "";
         for (; tokenPointer < tokens.length; ++tokenPointer) {
             title += tokens[tokenPointer];
@@ -90,20 +108,32 @@ public class OrgItem {
         return true;
     }
 
-    private boolean parseStars(String stars, boolean store) {
+    private String[] tokenise(String line) {
+        return line.split("\\s+");
+    }
+
+    private int starNum(String stars) {
         int numStars = 0;
 
         char[] chars = stars.toCharArray();
         for (int i=0; i<chars.length; ++i) {
             if (chars[i] != '*') {
-                return false;
+                return 0;
             }
             numStars++;
         }
 
-        if (store) treeLevel = numStars;
+        return numStars;
+    }
 
-        return true;
+    private boolean parseStars(String stars, boolean store) {
+        treeLevel = starNum(stars);
+
+        if (treeLevel == 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     private boolean parseKeyword(String keyword) {
@@ -126,9 +156,12 @@ public class OrgItem {
     }
 
     private boolean parseSection(String line) {
-        String[] tokens = line.split("\\s+");
+        String[] tokens = tokenise(line);
+        if (tokens.length == 0) {
+            return false;
+        }
 
-        if (parseStars(tokens[0], false)) {
+        if (starNum(tokens[0]) != 0) {
             return false;
         } else {
             section += line + "\n";

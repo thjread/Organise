@@ -1,0 +1,115 @@
+* Revision
+** DONE Biology
+CLOSED: [2016-06-07 Tue 16:30] DEADLINE: <2016-06-07 Tue>
+*** DONE Multiple choice
+CLOSED: [2016-06-07 Tue 16:30]
+**** DONE Practice papers
+CLOSED: [2016-06-07 Tue 16:30]
+***** DONE June 2013 V1
+CLOSED: [2016-06-04 Sat 16:47] SCHEDULED: <2016-06-01 Wed>
+***** DONE June 2014 V1
+CLOSED: [2016-06-04 Sat 16:47] SCHEDULED: <2016-06-02 Thu>
+***** DONE June 2012 V1
+CLOSED: [2016-06-04 Sat 16:46] SCHEDULED: <2016-06-03 Fri>
+***** DONE June 2011 V1
+CLOSED: [2016-06-06 Mon 11:20] SCHEDULED: <2016-06-06 Mon>
+***** DONE November 2014 V1
+CLOSED: [2016-06-07 Tue 09:18] SCHEDULED: <2016-06-07 Tue>
+**** DONE Textbook
+CLOSED: [2016-06-07 Tue 16:30]
+***** DONE Cell structure
+CLOSED: [2016-06-06 Mon 15:11] SCHEDULED: <2016-06-06 Mon>
+***** DONE Mitotic cell cycle
+CLOSED: [2016-06-06 Mon 15:20] SCHEDULED: <2016-06-06 Mon>
+***** DONE Transport in plants
+CLOSED: [2016-06-06 Mon 15:29] SCHEDULED: <2016-06-06 Mon>
+***** DONE Transport in mammals (inc. Hb structure)
+CLOSED: [2016-06-07 Tue 12:02] SCHEDULED: <2016-06-07 Tue>
+***** DONE Gas exchange and smoking
+CLOSED: [2016-06-06 Mon 20:29] SCHEDULED: <2016-06-06 Mon>
+***** DONE Infectious diseases
+CLOSED: [2016-06-07 Tue 11:34] SCHEDULED: <2016-06-07 Tue>
+***** DONE Immunity
+CLOSED: [2016-06-07 Tue 11:59] SCHEDULED: <2016-06-07 Tue>
+***** DONE Skim other chapters
+CLOSED: [2016-06-07 Tue 12:07] SCHEDULED: <2016-06-07 Tue>
+** Maths
+*** DONE M3
+CLOSED: [2016-06-08 Wed 11:15] DEADLINE: <2016-06-08 Wed>
+**** DONE Practice papers
+CLOSED: [2016-06-07 Tue 18:36]
+***** DONE M3 June 2012
+CLOSED: [2016-06-04 Sat 12:00] SCHEDULED: <2016-06-03 Fri>
+***** DONE M3 January 2012
+CLOSED: [2016-06-04 Sat 12:00] SCHEDULED: <2016-06-03 Fri>
+***** DONE M3 June 2013
+CLOSED: [2016-06-04 Sat 19:03] SCHEDULED: <2016-06-04 Sat>
+***** DONE M3 January 2013
+CLOSED: [2016-06-05 Sun 20:06] SCHEDULED: <2016-06-05 Sun>
+***** DONE M3 June 2014
+CLOSED: [2016-06-06 Mon 19:01] SCHEDULED: <2016-06-06 Mon>
+***** DONE M3 June 2015
+CLOSED: [2016-06-07 Tue 18:36] SCHEDULED: <2016-06-07 Tue>
+**** DONE Textbook
+CLOSED: [2016-06-06 Mon 11:49] SCHEDULED: <2016-06-06 Mon>
+*** STEP I
+DEADLINE: <2016-06-14 Tue>
+**** TODO Practice papers
+SCHEDULED: <2016-06-08 Wed>
+*** S2
+SCHEDULED: <2016-06-10 Fri> DEADLINE: <2016-06-15 Wed>
+**** TODO Practice papers
+**** TODO Textbook
+** Chemistry
+DEADLINE: <2016-06-09 Thu>
+*** STARTED Textbook
+**** DONE Electronic structure
+CLOSED: [2016-06-04 Sat 21:09]
+**** DONE Chemical forces
+CLOSED: [2016-06-04 Sat 21:09]
+**** DONE Energy changes
+CLOSED: [2016-06-04 Sat 21:10]
+**** DONE Periodic table
+CLOSED: [2016-06-04 Sat 21:10]
+**** DONE Main group chemistry
+CLOSED: [2016-06-06 Mon 14:01] SCHEDULED: <2016-06-06 Mon>
+**** DONE Group 14
+CLOSED: [2016-06-07 Tue 19:09] SCHEDULED: <2016-06-07 Tue>
+**** DONE Organic preliminaries
+CLOSED: [2016-06-07 Tue 19:25] SCHEDULED: <2016-06-07 Tue>
+**** DONE FGL
+CLOSED: [2016-06-08 Wed 12:10] SCHEDULED: <2016-06-08 Wed>
+**** TODO FGL 1
+SCHEDULED: <2016-06-08 Wed>
+**** TODO FGL 2
+SCHEDULED: <2016-06-08 Wed>
+**** TODO Spectrometry
+SCHEDULED: <2016-06-08 Wed>
+** Physics
+DEADLINE: <2016-06-09 Thu>
+*** TODO Notes
+SCHEDULED: <2016-06-08 Wed>
+* Projects
+** TODO Android
+*** DONE Basic app tutorial
+CLOSED: [2016-06-06 Mon 19:01]
+*** STARTED Org-mode Android app
+**** DONE Prototype design
+CLOSED: [2016-06-06 Mon 19:02]
+**** STARTED Implement basic views
+**** TODO org-mode file parser
+***** STARTED File I/O class
+***** TODO Recursive parser
+**** TODO Dropbox sync
+**** TODO Animations
+** TODO Wallpaper
+** TODO Install Arch on raspi
+** TODO Speed up pydmenu
+*** Systemd timer to rewrite cache
+*** Reload cache once every {interval}
+** TODO Arch bootable USB
+** TODO Make lemonbar forecast asynchronous
+* Astrophysics
+** TODO Observing booklet
+DEADLINE: <2016-08-01 Mon>
+* Tasks

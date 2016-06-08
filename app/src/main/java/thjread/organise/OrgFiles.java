@@ -1,5 +1,6 @@
 package thjread.organise;
 
+<<<<<<< HEAD
 import android.content.Context;
 
 import java.io.IOException;
@@ -19,3 +20,10 @@ public class OrgFiles {
     }
 }
 
+=======
+/**
+ * Created by tread on 08/06/16.
+ */
+public class OrgFiles {
+}
+>>>>>>> fda365c97e91fac4ef2099ef4d7b0b3803358063

@@ -1,5 +1,6 @@
 package thjread.organise;
 
+<<<<<<< HEAD
 import android.content.Context;
 
 import java.io.BufferedReader;
@@ -37,4 +38,10 @@ public class OrgFile {
     public String removeLine() {
         return file.remove(0);
     }
+=======
+/**
+ * Created by tread on 08/06/16.
+ */
+public class OrgFile {
+>>>>>>> fda365c97e91fac4ef2099ef4d7b0b3803358063
 }

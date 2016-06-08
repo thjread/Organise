@@ -1,5 +1,6 @@
 package thjread.organise;
 
+<<<<<<< HEAD
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -119,4 +120,10 @@ public class OrgItem {
             return false;
         }
     }
+=======
+/**
+ * Created by tread on 08/06/16.
+ */
+public class OrgItem {
+>>>>>>> fda365c97e91fac4ef2099ef4d7b0b3803358063
 }

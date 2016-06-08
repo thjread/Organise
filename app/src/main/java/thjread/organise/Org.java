@@ -1,5 +1,6 @@
 package thjread.organise;
 
+<<<<<<< HEAD
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -24,4 +25,10 @@ public class Org {
             }
         }
     }
+=======
+/**
+ * Created by tread on 08/06/16.
+ */
+public class Org {
+>>>>>>> fda365c97e91fac4ef2099ef4d7b0b3803358063
 }

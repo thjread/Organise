@@ -21,6 +21,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +56,23 @@ public class MainActivity extends AppCompatActivity
 
         ListView listView = (ListView) findViewById(R.id.listview);
         ArrayList<String> values = new ArrayList<String>();
-        values.add("Test 1"); values.add("Test 2"); values.add("Test 3");
+
+        OrgFiles files = new OrgFiles();
+
+        try {
+            files.loadFiles(this);
+            Org org = new Org(files.getFiles().get(0));
+            for (int i=0; i<org.rootItems.size(); ++i) {
+                String text = "";
+                OrgItem item = org.rootItems.get(i);
+                text += "(" + Integer.toString(item.treeLevel) + ", " +
+                        item.keyword + ") " + item.title;
+                values.add(text);
+            }
+        } catch (IOException e) {
+
+        }
+
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, values);
         listView.setAdapter(adapter);
     }

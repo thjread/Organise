@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 public class OrgItem {
     String title;
+    String section;
     ArrayList<OrgItem> children;
     int keyword;
     Date scheduled;
@@ -44,6 +45,12 @@ public class OrgItem {
             }
             success = parseFirstLine(file.removeLine());
         }
+
+        section = "";
+
+        while (!file.isEmpty() && parseSection(file.peekLine())) {
+            file.removeLine();
+        }
         return true;
     }
 
@@ -51,7 +58,7 @@ public class OrgItem {
         String[] tokens = line.split("\\s+");
         int tokenPointer = 0;
 
-        if (parseStars(tokens[tokenPointer])) {
+        if (parseStars(tokens[tokenPointer], true)) {
             tokenPointer++;
             if (tokenPointer >= tokens.length) return false;
         } else {
@@ -83,16 +90,18 @@ public class OrgItem {
         return true;
     }
 
-    private boolean parseStars(String stars) {
-        treeLevel = 0;
+    private boolean parseStars(String stars, boolean store) {
+        int numStars = 0;
 
         char[] chars = stars.toCharArray();
         for (int i=0; i<chars.length; ++i) {
             if (chars[i] != '*') {
                 return false;
             }
-            treeLevel++;
+            numStars++;
         }
+
+        if (store) treeLevel = numStars;
 
         return true;
     }
@@ -113,6 +122,17 @@ public class OrgItem {
             return true;
         } else {
             return false;
+        }
+    }
+
+    private boolean parseSection(String line) {
+        String[] tokens = line.split("\\s+");
+
+        if (parseStars(tokens[0], false)) {
+            return false;
+        } else {
+            section += line + "\n";
+            return true;
         }
     }
 }

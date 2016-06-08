@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity
                 String text = "";
                 OrgItem item = org.rootItems.get(i);
                 text += "(" + Integer.toString(item.treeLevel) + ", " +
-                        item.keyword + ") " + item.title;
+                        item.keyword + ") " + item.title + "\n" + item.section;
                 values.add(text);
             }
         } catch (IOException e) {

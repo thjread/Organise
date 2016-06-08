@@ -1,12 +1,7 @@
 package thjread.organise;
 
-<<<<<<< HEAD
-import android.text.TextUtils;
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Dictionary;
 import java.util.HashMap;
 
 public class OrgItem {
@@ -120,10 +115,4 @@ public class OrgItem {
             return false;
         }
     }
-=======
-/**
- * Created by tread on 08/06/16.
- */
-public class OrgItem {
->>>>>>> fda365c97e91fac4ef2099ef4d7b0b3803358063
 }

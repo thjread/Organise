@@ -1,6 +1,5 @@
 package thjread.organise;
 
-<<<<<<< HEAD
 import android.content.Context;
 
 import java.io.BufferedReader;
@@ -8,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Queue;
 
 public class OrgFile {
     ArrayList<String> file;
@@ -38,10 +36,4 @@ public class OrgFile {
     public String removeLine() {
         return file.remove(0);
     }
-=======
-/**
- * Created by tread on 08/06/16.
- */
-public class OrgFile {
->>>>>>> fda365c97e91fac4ef2099ef4d7b0b3803358063
 }

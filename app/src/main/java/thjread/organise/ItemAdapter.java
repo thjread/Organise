@@ -42,11 +42,11 @@ public class ItemAdapter extends ArrayAdapter<OrgItem> {
         TextView deadline = (TextView) convertView.findViewById(R.id.deadline);
         String deadlineText = "";
         if (item.deadline != null) {
-            deadlineText += "DEADLINE: " + item.deadline.toString();
+            deadlineText += "DEADLINE: " + DateFormatter.format(item.deadline);
         }
         if (item.scheduled != null) {
             if (deadlineText != "") deadlineText += " ";
-            deadlineText += "SCHEDULED: " + item.scheduled.toString();
+            deadlineText += "SCHEDULED: " + DateFormatter.format(item.scheduled);
         }
 
         if (deadlineText != "") {

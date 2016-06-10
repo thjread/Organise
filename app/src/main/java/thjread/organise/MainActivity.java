@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -27,6 +28,9 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private ArrayList<OrgItem> listItems;
+    private ArrayAdapter<OrgItem> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +59,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         ListView listView = (ListView) findViewById(R.id.listview);
-        ArrayList<String> values = new ArrayList<String>();
+        listItems = new ArrayList<OrgItem>();
 
         OrgFiles files = new OrgFiles();
 
@@ -63,18 +67,22 @@ public class MainActivity extends AppCompatActivity
             files.loadFiles(this);
             Org org = new Org(files.getFiles().get(0));
             for (int i=0; i<org.rootItems.size(); ++i) {
-                String text = "";
                 OrgItem item = org.rootItems.get(i);
-                text += "(" + Integer.toString(item.treeLevel) + ", " +
-                        item.keyword + ") " + item.title + "\n" + item.section;
-                values.add(text);
+                listItems.add(item);
             }
         } catch (IOException e) {
 
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, values);
+        adapter = new ItemAdapter(this, listItems);
         listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                OrgItem item = (OrgItem) parent.getItemAtPosition(position);
+                item.toggleExpanded(listItems, adapter, position);
+            }
+        });
     }
 
     @Override

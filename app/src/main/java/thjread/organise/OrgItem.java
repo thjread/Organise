@@ -1,12 +1,14 @@
 package thjread.organise;
 
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 public class OrgItem {
     String title;
@@ -22,6 +24,11 @@ public class OrgItem {
     HashMap<String, Integer> keywords;
 
     int treeLevel;
+    int expandState  = 0;
+
+    private long lastClick = 0;
+
+    static final int DOUBLE_TAP_TIME = 500;
 
     public OrgItem(HashMap<String, Integer> keywords) {
         this.keywords = keywords;
@@ -49,7 +56,56 @@ public class OrgItem {
         children.add(child);
     }
 
-    public boolean parse(OrgFile file) {
+    public int getExpanded() {
+        return expandState;
+    }
+
+    public void toggleExpanded(List<OrgItem> list, ArrayAdapter<OrgItem> adapter, int position) {
+        if (expandState == 0) {
+            setExpanded(1, list, adapter, position);
+            lastClick = System.currentTimeMillis();
+        } else if (expandState == 1) {
+            if (System.currentTimeMillis() - lastClick < DOUBLE_TAP_TIME) {
+                setExpanded(2, list, adapter, position);
+            } else {
+                setExpanded(0, list, adapter, position);
+            }
+        } else if (expandState == 2) {
+            setExpanded(0, list, adapter, position);
+        }
+    }
+
+    public void setExpanded(int expand, List<OrgItem> list, ArrayAdapter<OrgItem> adapter, int position) {
+        if (expand == 0) {
+            for (int i=0; i<children.size(); ++i) {
+                OrgItem child = children.get(i);
+                child.setExpanded(0, list, adapter, position+i+1);
+                list.remove(child);
+            }
+        } else if (expand == 1) {
+            if (expandState == 0) {
+                for (int i = 0; i < children.size(); ++i) {
+                    list.add(position+i+1, children.get(i));
+                }
+            }
+        } else if (expand == 2) {
+            if (expandState == 0) {
+                for (int i = 0; i < children.size(); ++i) {
+                    list.add(position+i+1, children.get(i));
+                }
+            }
+            for (int i=0; i<children.size(); ++i) {
+                OrgItem child = children.get(i);
+                child.setExpanded(2, list, adapter, list.indexOf(child));
+            }
+        }
+
+        adapter.notifyDataSetChanged();
+
+        expandState = expand;
+    }
+
+    public boolean parse(OrgFile file) { //http://orgmode.org/worg/dev/org-syntax.html
         boolean success = false;
         while (!success) {
             if (file.isEmpty()) {
@@ -184,7 +240,7 @@ public class OrgItem {
                 section += tokens[tokenPointer] + " ";
                 tokenPointer++;
             }
-            if (section.length() > 0) {
+            if (section.length() > 0) { //TODO: deal with blank lines properly
                 section = section.substring(0, section.length() - 1) + "\n";
             }
             return true;

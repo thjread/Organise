@@ -65,8 +65,8 @@ CLOSED: [2016-06-08 Wed 16:16] SCHEDULED: <2016-06-08 Wed>
 CLOSED: [2016-06-08 Wed 17:55] SCHEDULED: <2016-06-08 Wed>
 **** DONE Mechanisms
 CLOSED: [2016-06-08 Wed 18:00] SCHEDULED: <2016-06-08 Wed>
-**** DONE Spectrometry
-CLOSED: [2016-06-08 Wed 18:58] SCHEDULED: <2016-06-08 Wed>
+**** TODO Spectrometry
+SCHEDULED: <2016-06-08 Wed>
 ** DONE Physics
 CLOSED: [2016-06-09 Thu 20:27] DEADLINE: <2016-06-09 Thu>
 *** DONE Notes
@@ -100,5 +100,5 @@ CLOSED: [2016-06-08 Wed 18:59]
 * Astrophysics
 ** TODO Observing booklet
 DEADLINE: <2016-08-01 Mon>
-* Tasks
-DEADLINE: <2013-08-02 Tues>
+* STARTED Tasks
+DEADLINE: <2016-06-13 Tues>

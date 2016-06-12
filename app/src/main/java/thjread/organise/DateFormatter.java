@@ -25,7 +25,7 @@ public class DateFormatter {
     static final String[] weekdays = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
             "Saturday"};
 
-    static public String format(Date d) {
+    static public int days(Date d) {
         Calendar now = Calendar.getInstance();
         Calendar date = Calendar.getInstance();
         date.setTime(d);
@@ -33,6 +33,15 @@ public class DateFormatter {
         calendarToStartOfDay(date);
         long diff = date.getTimeInMillis() - now.getTimeInMillis();
         int days = Math.round(diff/ONE_DAY);
+
+        return days;
+    }
+
+    static public String format(Date d, boolean dayStyle) {
+        Calendar now = Calendar.getInstance();
+        Calendar date = Calendar.getInstance();
+        date.setTime(d);
+        int days = days(d);
 
         String string;
 
@@ -43,20 +52,30 @@ public class DateFormatter {
         } else if (days == 1) {
             string = "Tomorrow";
         } else if (days < 7 && days > 0) {
-            string = weekdays[date.get(Calendar.DAY_OF_WEEK)-1];
+            string = "";
+            if (dayStyle) string += Integer.toString(days) + " days (";
+            string += weekdays[date.get(Calendar.DAY_OF_WEEK)-1];
+            if (dayStyle) string += ")";
         } else {
             if (dateFormat == null) {
-                dateFormat = new SimpleDateFormat("EEE dd MMM");
+                dateFormat = new SimpleDateFormat("EEE d MMM");
             }
             if (yearDateFormat == null) {
-                yearDateFormat = new SimpleDateFormat("EEE dd MMM yyyy");
+                yearDateFormat = new SimpleDateFormat("EEE d MMM yyyy");
+            }
+
+            string = "";
+            if (days <= 14 && days > 0 && dayStyle) {
+                string += Integer.toString(days) + " days (";
             }
 
             if (now.get(Calendar.YEAR) == date.get(Calendar.YEAR)) {
-                string = dateFormat.format(d);
+                string += dateFormat.format(d);
             } else {
-                string = yearDateFormat.format(d);
+                string += yearDateFormat.format(d);
             }
+
+            if (days <= 14 && days > 0 && dayStyle) string += ")";
         }
 
         return string;

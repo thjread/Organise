@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Org {
-    ArrayList<OrgItem> rootItems;
+    public ArrayList<OrgItem> rootItems;
+    public ArrayList<OrgItem> items;
 
     public Org(OrgFile file) {
         HashMap<String, Integer> keywords = new HashMap<String, Integer>();
@@ -14,13 +15,21 @@ public class Org {
         keywords.put("STARTED", 1);
         keywords.put("DONE", 2);
 
-        rootItems = new ArrayList<OrgItem>();
+        rootItems = new ArrayList<>();
+        items = new ArrayList<OrgItem>();
 
         while (!file.isEmpty()) {
-            OrgItem item = new OrgItem(keywords);
+            OrgItem item = new OrgItem(keywords, items, null);
             if (item.parse(file)) {
                 rootItems.add(item);
+                items.add(item);
             }
+        }
+    }
+
+    public void resetExpanded() {
+        for (int i=0; i<items.size(); ++i) {
+            items.get(i).expandState = 0;
         }
     }
 }

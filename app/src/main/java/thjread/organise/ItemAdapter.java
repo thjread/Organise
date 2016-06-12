@@ -1,6 +1,9 @@
 package thjread.organise;
 
+import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -19,50 +22,31 @@ import java.util.List;
  * Created by tread on 07/06/16.
  */
 public class ItemAdapter extends ArrayAdapter<OrgItem> {
-    public ItemAdapter(Context context, ArrayList<OrgItem> items) {
+    private Integer animateId;
+    public boolean hasSetTransitionName = false;
+
+    public ItemAdapter(Context context, ArrayList<OrgItem> items, int animateId) {
         super(context, 0, items);
+        this.animateId = animateId;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         OrgItem item = getItem(position);
 
-        if (convertView == null) {
-            convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.itemview, parent, false);
+        convertView = ItemView.getView(item, convertView, parent, true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (animateId != null) {
+                if (item.id == animateId) {
+                    convertView.findViewById(R.id.item_cardview)
+                            .setTransitionName(convertView.getContext().getString(R.string.item_transition));
+                    hasSetTransitionName = true;
+                } else {
+                    convertView.findViewById(R.id.item_cardview).setTransitionName("");
+                }
+            }
         }
-
-        TextView headline = (TextView) convertView.findViewById(R.id.headline);
-        String head = "* " + item.title;
-        if (!item.children.isEmpty() && item.expandState == 0) {
-            head += " ...";
-        }
-        headline.setText(head);
-
-
-        TextView deadline = (TextView) convertView.findViewById(R.id.deadline);
-        String deadlineText = "";
-        if (item.deadline != null) {
-            deadlineText += "DEADLINE: " + DateFormatter.format(item.deadline);
-        }
-        if (item.scheduled != null) {
-            if (deadlineText != "") deadlineText += " ";
-            deadlineText += "SCHEDULED: " + DateFormatter.format(item.scheduled);
-        }
-
-        if (deadlineText != "") {
-            deadline.setVisibility(View.VISIBLE);
-            deadline.setText(deadlineText);
-        } else {
-            deadline.setVisibility(View.GONE);
-        }
-
-        Context context = convertView.getContext();
-        final float scale = context.getResources().getDisplayMetrics().density;
-        int paddingStart = Math.round(30*scale*(item.treeLevel-1));
-        LinearLayout container = (LinearLayout) convertView.findViewById(R.id.item_container);
-        container.setPaddingRelative(paddingStart, container.getPaddingTop(),
-                container.getPaddingEnd(), container.getPaddingBottom());
-
         return convertView;
     }
 }

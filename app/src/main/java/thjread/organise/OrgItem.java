@@ -19,6 +19,13 @@ public class OrgItem {
     Date deadline;
     Date closed;
 
+    OrgItem parent;
+
+    ArrayList<Integer> all_child_ids;
+
+    int id;
+    private static int id_counter = 0;
+
     SimpleDateFormat format;
 
     HashMap<String, Integer> keywords;
@@ -30,17 +37,26 @@ public class OrgItem {
 
     static final int DOUBLE_TAP_TIME = 500;
 
-    public OrgItem(HashMap<String, Integer> keywords) {
+    ArrayList<OrgItem> items;
+
+    public OrgItem(HashMap<String, Integer> keywords, ArrayList<OrgItem> items, OrgItem parent) {
         this.keywords = keywords;
+        this.items = items;
         children = new ArrayList<OrgItem>();
         scheduled = null;
         deadline = null;
         closed = null;
         format = new SimpleDateFormat("yyyy-MM-dd");
+        this.id = id_counter;
+        id_counter++;
+        all_child_ids = new ArrayList<>();
+        all_child_ids.add(this.id);
+        this.parent = parent;
     }
     
     public OrgItem(HashMap<String, Integer> keywords, String title, Date scheduled,
-                   Date deadline, Date closed, int keyword, int treeLevel) {
+                   Date deadline, Date closed, int keyword, int treeLevel, ArrayList<OrgItem> items,
+                   OrgItem parent) {
         this.keywords = keywords;
         this.title = title;
         this.scheduled = scheduled;
@@ -48,12 +64,28 @@ public class OrgItem {
         this.closed = closed;
         this.keyword = keyword;
         this.treeLevel = treeLevel;
+        this.items = items;
         children = new ArrayList<OrgItem>();
         format = new SimpleDateFormat("yyyy-MM-dd");
+        this.id = id_counter;
+        id_counter++;
+        all_child_ids = new ArrayList<>();
+        all_child_ids.add(this.id);
+        this.parent = parent;
     }
 
     public void addChild(OrgItem child) {
         children.add(child);
+        this.addChildIds(child);
+    }
+
+    public void addChildIds(OrgItem child) {
+        for (int i=0; i<child.all_child_ids.size(); ++i) {
+            all_child_ids.add(child.all_child_ids.get(i));
+        }
+        if (parent != null) {
+            parent.addChildIds(child);
+        }
     }
 
     public int getExpanded() {
@@ -125,9 +157,10 @@ public class OrgItem {
             if (tokens.length != 0) {
                 int stars = starNum(tokens[0]);
                 if (stars > treeLevel) {
-                    OrgItem item = new OrgItem(keywords);
+                    OrgItem item = new OrgItem(keywords, items, this);
                     item.parse(file);
                     this.addChild(item);
+                    items.add(item);
                 } else {
                     return true;
                 }
@@ -271,8 +304,6 @@ public class OrgItem {
             default:
                 return tokenPointer;
         }
-
-        Log.d("thjread.organise", this.title + " " + d.toString());
 
         return returnPointer;
     }

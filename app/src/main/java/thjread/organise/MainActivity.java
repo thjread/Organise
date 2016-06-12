@@ -1,13 +1,22 @@
 package thjread.organise;
 
 import android.app.FragmentTransaction;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.app.Fragment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.transition.ChangeBounds;
+import android.transition.Explode;
+import android.transition.Transition;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -17,22 +26,34 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.animation.BounceInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private ArrayList<OrgItem> listItems;
+    private ArrayList<OrgItem> scheduledToday;
+    private ArrayList<OrgItem> deadlineSoon;
     private ArrayAdapter<OrgItem> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+            //getWindow().setExitTransition(new Explode());
+        }
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -56,31 +77,95 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        ListView listView = (ListView) findViewById(R.id.listview);
-        listItems = new ArrayList<OrgItem>();
+        LinearLayout scheduledContainer = (LinearLayout) findViewById(R.id.scheduledtoday);
+        LinearLayout deadlineContainer = (LinearLayout) findViewById(R.id.deadlinesoon);
+        scheduledToday = new ArrayList<OrgItem>();
+        deadlineSoon = new ArrayList<OrgItem>();
 
-        OrgFiles files = new OrgFiles();
+        OrgFiles files = GlobalState.getFiles();
 
         try {
             files.loadFiles(this);
             Org org = new Org(files.getFiles().get(0));
-            for (int i=0; i<org.rootItems.size(); ++i) {
-                OrgItem item = org.rootItems.get(i);
-                listItems.add(item);
+            GlobalState.setCurrentOrg(org);
+            for (int i=0; i<org.items.size(); ++i) {
+                OrgItem item = org.items.get(i);
+                if (item.deadline != null && item.keyword != 2) {//TODO deal with keywords properly
+                    if (DateFormatter.days(item.deadline) < 5) {
+                        deadlineSoon.add(item);
+                    }
+                }
+                if (item.scheduled != null && item.keyword != 2) {
+                    if (DateFormatter.days(item.scheduled) <= 0) {
+                        scheduledToday.add(item);
+                    }
+                }
             }
         } catch (IOException e) {
 
         }
 
-        adapter = new ItemAdapter(this, listItems);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        class ScheduledComparator implements Comparator<OrgItem> {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                OrgItem item = (OrgItem) parent.getItemAtPosition(position);
-                item.toggleExpanded(listItems, adapter, position);
+            public int compare(OrgItem o1, OrgItem o2) {
+                return o1.scheduled.compareTo(o2.scheduled);
             }
-        });
+        }
+        Collections.sort(scheduledToday, new ScheduledComparator());
+
+        for (int i=0; i<scheduledToday.size(); ++i) {
+            final OrgItem item = scheduledToday.get(i);
+            View itemView = ItemView.getView(item, null,
+                    scheduledContainer, false);
+            scheduledContainer.addView(itemView);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    launchDocumentActivity(v, item);
+                }
+            }
+            );
+        }
+
+        class DeadlineComparator implements Comparator<OrgItem> {
+            @Override
+            public int compare(OrgItem o1, OrgItem o2) {
+                return o1.deadline.compareTo(o2.deadline);
+            }
+        }
+        Collections.sort(deadlineSoon, new DeadlineComparator());
+        for (int i=0; i<deadlineSoon.size(); ++i) {
+            final OrgItem item = deadlineSoon.get(i);
+            View itemView = ItemView.getView(item, null,
+                    deadlineContainer, false);
+            deadlineContainer.addView(itemView);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    launchDocumentActivity(v, item);
+                }
+            }
+            );
+        }
+    }
+
+    private void launchDocumentActivity(View v, OrgItem item) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            v.findViewById(R.id.item_cardview)
+                .setTransitionName(getString(R.string.item_transition));
+        }
+        Intent i = new Intent(v.getContext(), DocumentActivity.class);
+        Bundle b;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
+                    v, getString(R.string.item_transition));
+            b = options.toBundle();
+        } else {
+            b = new Bundle();
+        }
+        b.putInt("id", item.id);
+        i.putExtras(b);
+        ActivityCompat.startActivity(this, i, b);
     }
 
     @Override

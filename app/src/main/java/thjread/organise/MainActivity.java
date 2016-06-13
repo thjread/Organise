@@ -15,6 +15,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.transition.ChangeBounds;
 import android.transition.Explode;
+import android.transition.Fade;
 import android.transition.Transition;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Upcoming");
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -116,7 +118,7 @@ public class MainActivity extends AppCompatActivity
         for (int i=0; i<scheduledToday.size(); ++i) {
             final OrgItem item = scheduledToday.get(i);
             View itemView = ItemView.getView(item, null,
-                    scheduledContainer, false);
+                    scheduledContainer, false, false);
             scheduledContainer.addView(itemView);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -137,7 +139,7 @@ public class MainActivity extends AppCompatActivity
         for (int i=0; i<deadlineSoon.size(); ++i) {
             final OrgItem item = deadlineSoon.get(i);
             View itemView = ItemView.getView(item, null,
-                    deadlineContainer, false);
+                    deadlineContainer, false, false);
             deadlineContainer.addView(itemView);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

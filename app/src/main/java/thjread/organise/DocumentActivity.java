@@ -31,6 +31,8 @@ public class DocumentActivity extends AppCompatActivity {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+            getWindow().setExitTransition(null);
+            getWindow().setSharedElementExitTransition(null);
             //getWindow().setEnterTransition(new Explode());
             ActivityCompat.postponeEnterTransition(this);
         }
@@ -43,6 +45,7 @@ public class DocumentActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_document);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Todo.org");
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -81,6 +84,7 @@ public class DocumentActivity extends AppCompatActivity {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                             if (adapter.hasSetTransitionName) {
                                 ActivityCompat.startPostponedEnterTransition(thisActivity);
+                                adapter.transitionView.setTransitionName("");
                             }
                         }
                     }

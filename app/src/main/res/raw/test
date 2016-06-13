@@ -1,23 +1,5 @@
 * Revision
 ** Maths
-*** DONE M3
-CLOSED: [2016-06-08 Wed 11:15] DEADLINE: <2016-06-08 Wed>
-**** DONE Practice papers
-CLOSED: [2016-06-07 Tue 18:36]
-***** DONE M3 June 2012
-CLOSED: [2016-06-04 Sat 12:00] SCHEDULED: <2016-06-03 Fri>
-***** DONE M3 January 2012
-CLOSED: [2016-06-04 Sat 12:00] SCHEDULED: <2016-06-03 Fri>
-***** DONE M3 June 2013
-CLOSED: [2016-06-04 Sat 19:03] SCHEDULED: <2016-06-04 Sat>
-***** DONE M3 January 2013
-CLOSED: [2016-06-05 Sun 20:06] SCHEDULED: <2016-06-05 Sun>
-***** DONE M3 June 2014
-CLOSED: [2016-06-06 Mon 19:01] SCHEDULED: <2016-06-06 Mon>
-***** DONE M3 June 2015
-CLOSED: [2016-06-07 Tue 18:36] SCHEDULED: <2016-06-07 Tue>
-**** DONE Textbook
-CLOSED: [2016-06-06 Mon 11:49] SCHEDULED: <2016-06-06 Mon>
 *** STEP I
 DEADLINE: <2016-06-14 Tue>
 **** STARTED Practice papers
@@ -27,46 +9,18 @@ DEADLINE: <2016-06-15 Wed>
 **** STARTED Practice papers
 ***** DONE January 2013
 CLOSED: [2016-06-10 Fri 12:09] SCHEDULED: <2016-06-10 Fri>
-***** TODO June 2011
-SCHEDULED: <2016-06-11 Sat>
-***** TODO June 2012
-SCHEDULED: <2016-06-12 Sun>
+***** DONE January 2012
+CLOSED: [2016-06-11 Sat 17:12] SCHEDULED: <2016-06-11 Sat>
+***** DONE June 2012
+CLOSED: [2016-06-12 Sun 20:20] SCHEDULED: <2016-06-12 Sun>
 ***** TODO June 2013
 SCHEDULED: <2016-06-13 Mon>
 ***** TODO June 2014
 SCHEDULED: <2016-06-14 Tue>
-**** TODO Textbook
-SCHEDULED: <2016-06-11 Sat>
-** DONE Chemistry
-CLOSED: [2016-06-09 Thu 16:15] DEADLINE: <2016-06-09 Thu>
-*** DONE Textbook
-CLOSED: [2016-06-08 Wed 18:58]
-**** DONE Electronic structure
-CLOSED: [2016-06-04 Sat 21:09]
-**** DONE Chemical forces
-CLOSED: [2016-06-04 Sat 21:09]
-**** DONE Energy changes
-CLOSED: [2016-06-04 Sat 21:10]
-**** DONE Periodic table
-CLOSED: [2016-06-04 Sat 21:10]
-**** DONE Main group chemistry
-CLOSED: [2016-06-06 Mon 14:01] SCHEDULED: <2016-06-06 Mon>
-**** DONE Group 14
-CLOSED: [2016-06-07 Tue 19:09] SCHEDULED: <2016-06-07 Tue>
-**** DONE Organic preliminaries
-CLOSED: [2016-06-07 Tue 19:25] SCHEDULED: <2016-06-07 Tue>
-**** DONE FGL
-CLOSED: [2016-06-08 Wed 12:10] SCHEDULED: <2016-06-08 Wed>
-**** DONE FGL 1
-CLOSED: [2016-06-08 Wed 14:22] SCHEDULED: <2016-06-08 Wed>
-**** DONE FGL 2
-CLOSED: [2016-06-08 Wed 16:16] SCHEDULED: <2016-06-08 Wed>
-**** DONE Addition and elimination reactions
-CLOSED: [2016-06-08 Wed 17:55] SCHEDULED: <2016-06-08 Wed>
-**** DONE Mechanisms
-CLOSED: [2016-06-08 Wed 18:00] SCHEDULED: <2016-06-08 Wed>
-**** TODO Spectrometry
-SCHEDULED: <2016-06-08 Wed>
+**** DONE Textbook
+CLOSED: [2016-06-11 Sat 14:14] SCHEDULED: <2016-06-11 Sat>
+***** TODO Review conditions for approximations and models
+SCHEDULED: <2016-06-14 Tue>
 ** DONE Physics
 CLOSED: [2016-06-09 Thu 20:27] DEADLINE: <2016-06-09 Thu>
 *** DONE Notes
@@ -81,12 +35,21 @@ CLOSED: [2016-06-06 Mon 19:02]
 **** STARTED Implement basic views
 ***** STARTED Home view
 ***** STARTED Item view
-***** TODO Document view
+****** TODO Swipe to done
+***** STARTED Document view
+****** TODO Hierarchical colours
+****** TODO Alternating colours
+***** STARTED Item add view
+***** TODO Item edit view
 **** STARTED org-mode file parser
-***** DONE File I/O class
-CLOSED: [2016-06-08 Wed 15:11]
+***** STARTED File I/O class
+****** TODO Multiple file selection
+****** TODO File write
 ***** DONE Recursive parser
 CLOSED: [2016-06-08 Wed 18:59]
+***** TODO Parser file write
+**** DONE Global state class
+CLOSED: [2016-06-12 Sun 21:47]
 **** TODO Dropbox sync
 **** TODO Animations
 ** TODO Wallpaper
@@ -100,5 +63,4 @@ CLOSED: [2016-06-08 Wed 18:59]
 * Astrophysics
 ** TODO Observing booklet
 DEADLINE: <2016-08-01 Mon>
-* STARTED Tasks
-DEADLINE: <2016-06-13 Tues>
+* Tasks

@@ -28,7 +28,7 @@ public class OrgItem {
 
     SimpleDateFormat format;
 
-    HashMap<String, Integer> keywords;
+    Org.Keyword keywords;
 
     int treeLevel;
     int expandState  = 0;
@@ -39,7 +39,9 @@ public class OrgItem {
 
     ArrayList<OrgItem> items;
 
-    public OrgItem(HashMap<String, Integer> keywords, ArrayList<OrgItem> items, OrgItem parent) {
+    int child_number;
+
+    public OrgItem(Org.Keyword keywords, ArrayList<OrgItem> items, OrgItem parent, int child_number) {
         this.keywords = keywords;
         this.items = items;
         children = new ArrayList<OrgItem>();
@@ -52,11 +54,12 @@ public class OrgItem {
         all_child_ids = new ArrayList<>();
         all_child_ids.add(this.id);
         this.parent = parent;
+        this.child_number = child_number;
     }
     
-    public OrgItem(HashMap<String, Integer> keywords, String title, Date scheduled,
+    public OrgItem(Org.Keyword keywords, String title, Date scheduled,
                    Date deadline, Date closed, int keyword, int treeLevel, ArrayList<OrgItem> items,
-                   OrgItem parent) {
+                   OrgItem parent, int child_number) {
         this.keywords = keywords;
         this.title = title;
         this.scheduled = scheduled;
@@ -72,6 +75,7 @@ public class OrgItem {
         all_child_ids = new ArrayList<>();
         all_child_ids.add(this.id);
         this.parent = parent;
+        this.child_number = child_number;
     }
 
     public void addChild(OrgItem child) {
@@ -137,6 +141,10 @@ public class OrgItem {
         expandState = expand;
     }
 
+    public void nextKeyword() {
+        keyword = (keyword+1) % (keywords.getMaxKeyword() + 1);
+    }
+
     public boolean parse(OrgFile file) { //http://orgmode.org/worg/dev/org-syntax.html
         boolean success = false;
         while (!success) {
@@ -157,7 +165,7 @@ public class OrgItem {
             if (tokens.length != 0) {
                 int stars = starNum(tokens[0]);
                 if (stars > treeLevel) {
-                    OrgItem item = new OrgItem(keywords, items, this);
+                    OrgItem item = new OrgItem(keywords, items, this, this.children.size());
                     item.parse(file);
                     this.addChild(item);
                     items.add(item);
@@ -190,7 +198,7 @@ public class OrgItem {
             tokenPointer++;
             if (tokenPointer >= tokens.length) return false;
         } else {
-            keyword = -1;
+            keyword = 0;
         }
 
         title = "";
@@ -238,8 +246,8 @@ public class OrgItem {
     }
 
     private boolean parseKeyword(String keyword) {
-        Integer key = keywords.get(keyword);
-        if (key != null) {
+        int key = keywords.keywordToInt(keyword);
+        if (key != 0) {
             this.keyword = key;
             return true;
         } else {
@@ -342,12 +350,3 @@ public class OrgItem {
     }
 }
 
-class Pair<T, U> {
-    public final T t;
-    public final U u;
-
-    public Pair(T t, U u) {
-        this.t= t;
-        this.u= u;
-    }
-}

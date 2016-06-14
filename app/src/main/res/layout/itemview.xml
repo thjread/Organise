@@ -31,7 +31,8 @@
                     android:id="@+id/keyword"
                     android:textColor="#F5F5F5"
                     android:fontFeatureSettings="smcp"
-                    android:textSize="12dp"/>
+                    android:textSize="12dp"
+                    android:textStyle="bold"/>
                 <TextView android:layout_width="1dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -48,13 +49,13 @@
                 <TextView android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/deadline"
-                    android:textColor="#BDBDBD"
+                    android:textColor="#E0E0E0"
                     android:fontFeatureSettings="smcp"/>
                 <TextView android:layout_width="1dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:id="@+id/deadline_text"
-                    android:textColor="#BDBDBD"/>
+                    android:textColor="#E0E0E0"/>
             </LinearLayout>
 
 

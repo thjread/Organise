@@ -3,6 +3,8 @@ package thjread.organise;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.ColorUtils;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +21,8 @@ public class ItemView {
     private static ArrayList<Integer> colors;
     private static Integer base_color;
 
-    public static View getView(OrgItem item, View convertView, ViewGroup parent, boolean indent, boolean do_colors) {
+    public static View getView(OrgItem item, View convertView, ViewGroup parent, boolean indent, boolean do_colors,
+                               boolean light) {
         if (convertView == null) {
             convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.itemview, parent, false);
         }
@@ -41,13 +44,21 @@ public class ItemView {
 
         TextView headline = (TextView) convertView.findViewById(R.id.headline);
         TextView keyword = (TextView) convertView.findViewById(R.id.keyword);
-        String key = "";
-        switch(item.keyword) {
-            case 0: key = "TODO: ";
+        String key = item.keywords.intToKeyword(item.keyword) + ": ";
+        if (item.keyword == 0) {
+            key = "";
+        }
+        int keywordType = item.keywords.keywordType(item.keyword);
+        switch(keywordType) {
+            case Org.Keyword.TODO_KEYWORD_TYPE:
+                if (item.treeLevel == 4 || item.treeLevel == 5 && do_colors) {
+                    keyword.setTextColor(Color.parseColor("#FFCCBC"));
+                } else {
+                    keyword.setTextColor(Color.parseColor("#FF5722"));
+                }
                 break;
-            case 1: key = "STARTED: ";
-                break;
-            case 2: key = "DONE: ";
+            case Org.Keyword.STARTED_KEYWORD_TYPE:
+                keyword.setTextColor(Color.parseColor("#FFD54F"));
                 break;
         }
         String head = item.title;
@@ -89,19 +100,50 @@ public class ItemView {
                     container.getPaddingEnd(), container.getPaddingBottom());
         }
 
-        int color = getColor(item, do_colors);
-        convertView.findViewById(R.id.item_cardview).setBackgroundColor(color);
+        int color = getColor(item, do_colors, light);
+        CardView card_view = (CardView) convertView.findViewById(R.id.item_cardview);
+        card_view.setBackgroundColor(color);
 
+        if (keywordType == Org.Keyword.DONE_KEYWORD_TYPE) {
+            headline.setTextColor(lightenColor(color, 0.5f));
+            deadline.setTextColor(lightenColor(color, 0.5f));
+            deadlineText.setTextColor(lightenColor(color, 0.5f));
+            card_view.setBackgroundColor(lightenColor(color, 0.2f));
+            int key_color = Color.parseColor("#00C853");
+            keyword.setTextColor(ColorUtils.blendARGB(key_color, color, 0.3f));
+        } else {
+            headline.setTextColor(Color.parseColor("#F5F5F5"));
+            deadline.setTextColor(Color.parseColor("#E0E0E0"));
+            deadlineText.setTextColor(Color.parseColor("#E0E0E0"));
+        }
         return convertView;
     }
 
-    public static int getColor(OrgItem item, boolean do_colors) { //Must call getView first to populate colors
+    public static int getColor(OrgItem item, boolean do_colors, boolean light) { //Must call getView first to populate colors
         int color;
         if (do_colors) {
             color = colors.get((item.treeLevel - 1) % 8);
         } else {
             color = base_color;
         }
-        return color;
+        if (light) {
+            return lightColor(color);
+        } else {
+            return color;
+        }
+    }
+
+    public static int lightColor(int color) {
+        float hsl[] = {0, 0, 0};
+        ColorUtils.colorToHSL(color, hsl);
+        hsl[2] += 0.05;
+        return ColorUtils.HSLToColor(hsl);
+    }
+
+    public static int lightenColor(int color, float amount) {
+        float hsl[] = {0, 0, 0};
+        ColorUtils.colorToHSL(color, hsl);
+        hsl[2] = 1-((1-amount)*(1-hsl[2]));
+        return ColorUtils.HSLToColor(hsl);
     }
 }

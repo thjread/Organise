@@ -6,19 +6,11 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.transition.ChangeBounds;
-import android.transition.Explode;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.view.animation.BounceInterpolator;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.RunnableFuture;
 
 public class DocumentActivity extends AppCompatActivity {
     private ArrayList<OrgItem> listItems;
@@ -63,13 +55,6 @@ public class DocumentActivity extends AppCompatActivity {
 
         adapter = new ItemAdapter(this, listItems, id);
         listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                OrgItem item = (OrgItem) parent.getItemAtPosition(position);
-                item.toggleExpanded(listItems, adapter, position);
-            }
-        });
 
         if (id != -1) {
             final OrgItem item = expandItemWithId(id, org.rootItems);
@@ -85,6 +70,7 @@ public class DocumentActivity extends AppCompatActivity {
                             if (adapter.hasSetTransitionName) {
                                 ActivityCompat.startPostponedEnterTransition(thisActivity);
                                 adapter.transitionView.setTransitionName("");
+                                listView.removeOnLayoutChangeListener(this);
                             }
                         }
                     }

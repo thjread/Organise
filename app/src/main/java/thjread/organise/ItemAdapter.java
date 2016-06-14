@@ -29,27 +29,30 @@ public class ItemAdapter extends ArrayAdapter<OrgItem> {
     private Integer animateId;
     public boolean hasSetTransitionName = false;
     public CardView transitionView;
+    private ArrayList<OrgItem> items;
 
     public ItemAdapter(Context context, ArrayList<OrgItem> items, int animateId) {
         super(context, 0, items);
         this.animateId = animateId;
+        this.items = items;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        OrgItem item = getItem(position);
+    public View getView(final int position, View convertView, final ViewGroup parent) {
+        final OrgItem item = getItem(position);
 
-        convertView = ItemView.getView(item, convertView, parent, true, true);
+        convertView = ItemView.getView(item, convertView, parent, true, true, (item.child_number%2) == 0);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if (animateId != null) {
+            if (animateId != null && hasSetTransitionName == false) {
                 if (item.id == animateId) {
                     final CardView cardview = (CardView) convertView.findViewById(R.id.item_cardview);
                     cardview.setTransitionName(convertView.getContext().getString(R.string.item_transition));
                     hasSetTransitionName = true;
                     transitionView = cardview;
                     ValueAnimator anim = new ValueAnimator();
-                    anim.setIntValues(ItemView.getColor(item, false), ItemView.getColor(item, true));
+                    anim.setIntValues(ItemView.getColor(item, false, false),
+                            ItemView.getColor(item, true, (item.child_number%2) == 0));
                     anim.setEvaluator(new ArgbEvaluator());
                     anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                         @Override
@@ -58,13 +61,28 @@ public class ItemAdapter extends ArrayAdapter<OrgItem> {
                             cardview.setBackgroundColor(color);
                         }
                     });
-                    anim.setDuration(300);
+                    anim.setDuration(350);
                     anim.start();
                 } else {
                     convertView.findViewById(R.id.item_cardview).setTransitionName("");
                 }
             }
         }
+
+        final ArrayAdapter<OrgItem> adapter = this;
+        final View v = convertView;
+        convertView.setOnTouchListener(new OnSwipeTouchListener(convertView.getContext()) {
+            public void onSwipeRight() {
+                item.nextKeyword();
+                ItemView.getView(item, v, parent, true, true, (item.child_number%2) == 0);
+            }
+
+            public void onTap() {
+                item.toggleExpanded(items, adapter, position);
+                adapter.notifyDataSetChanged();
+            }
+        });
+
         return convertView;
     }
 }

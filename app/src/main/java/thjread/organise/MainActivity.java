@@ -17,6 +17,7 @@ import android.transition.ChangeBounds;
 import android.transition.Explode;
 import android.transition.Fade;
 import android.transition.Transition;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -27,6 +28,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.BounceInterpolator;
 import android.widget.AdapterView;
@@ -44,7 +46,8 @@ public class MainActivity extends AppCompatActivity
 
     private ArrayList<OrgItem> scheduledToday;
     private ArrayList<OrgItem> deadlineSoon;
-    private ArrayAdapter<OrgItem> adapter;
+
+    private ArrayList<Pair<OrgItem, Pair<View, ViewGroup>>> views;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,8 +82,8 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        LinearLayout scheduledContainer = (LinearLayout) findViewById(R.id.scheduledtoday);
-        LinearLayout deadlineContainer = (LinearLayout) findViewById(R.id.deadlinesoon);
+        final LinearLayout scheduledContainer = (LinearLayout) findViewById(R.id.scheduledtoday);
+        final LinearLayout deadlineContainer = (LinearLayout) findViewById(R.id.deadlinesoon);
         scheduledToday = new ArrayList<OrgItem>();
         deadlineSoon = new ArrayList<OrgItem>();
 
@@ -92,13 +95,17 @@ public class MainActivity extends AppCompatActivity
             GlobalState.setCurrentOrg(org);
             for (int i=0; i<org.items.size(); ++i) {
                 OrgItem item = org.items.get(i);
-                if (item.deadline != null && item.keyword != 2) {//TODO deal with keywords properly
+                if (item.deadline != null &&
+                        item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE) {
                     if (DateFormatter.days(item.deadline) < 5) {
                         deadlineSoon.add(item);
                     }
                 }
-                if (item.scheduled != null && item.keyword != 2) {
-                    if (DateFormatter.days(item.scheduled) <= 0) {
+                if (item.scheduled != null) {
+                    int days = DateFormatter.days(item.scheduled);
+                    if (days == 0 ||
+                            (item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE
+                                    && days <= 0)) {//TODO use done date
                         scheduledToday.add(item);
                     }
                 }
@@ -115,18 +122,25 @@ public class MainActivity extends AppCompatActivity
         }
         Collections.sort(scheduledToday, new ScheduledComparator());
 
+        views = new ArrayList<>();
         for (int i=0; i<scheduledToday.size(); ++i) {
             final OrgItem item = scheduledToday.get(i);
-            View itemView = ItemView.getView(item, null,
-                    scheduledContainer, false, false);
+            final View itemView = ItemView.getView(item, null,
+                    scheduledContainer, false, false, false);
+            views.add(new Pair<>(item, new Pair<>(itemView, (ViewGroup) scheduledContainer)));
             scheduledContainer.addView(itemView);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    launchDocumentActivity(v, item);
+
+            itemView.setOnTouchListener(new OnSwipeTouchListener(itemView.getContext()) {
+                public void onSwipeRight() {
+                    item.nextKeyword();
+                    item.expandState = 0;
+                    ItemView.getView(item, itemView, scheduledContainer, false, false, false);
                 }
-            }
-            );
+
+                public void onTap() {
+                    launchDocumentActivity(itemView, item);
+                }
+            });
         }
 
         class DeadlineComparator implements Comparator<OrgItem> {
@@ -138,16 +152,32 @@ public class MainActivity extends AppCompatActivity
         Collections.sort(deadlineSoon, new DeadlineComparator());
         for (int i=0; i<deadlineSoon.size(); ++i) {
             final OrgItem item = deadlineSoon.get(i);
-            View itemView = ItemView.getView(item, null,
-                    deadlineContainer, false, false);
+            final View itemView = ItemView.getView(item, null,
+                    deadlineContainer, false, false, false);
+            views.add(new Pair<>(item, new Pair<>(itemView, (ViewGroup) deadlineContainer)));
             deadlineContainer.addView(itemView);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    launchDocumentActivity(v, item);
+            itemView.setOnTouchListener(new OnSwipeTouchListener(itemView.getContext()) {
+                public void onSwipeRight() {
+                    item.nextKeyword();
+                    item.expandState = 0;
+                    ItemView.getView(item, itemView, deadlineContainer, false, false, false);
                 }
-            }
-            );
+
+                public void onTap() {
+                    launchDocumentActivity(itemView, item);
+                }
+            });
+        }
+    }
+
+    private void refreshViews() {
+        for (int i=0; i<views.size(); ++i) {
+            Pair<OrgItem, Pair<View, ViewGroup>> it = views.get(i);
+            OrgItem item = it.t;
+            View itemView = it.u.t;
+            ViewGroup container = it.u.u;
+            item.expandState = 0;
+            ItemView.getView(item, itemView, container, false, false, false);
         }
     }
 
@@ -168,6 +198,12 @@ public class MainActivity extends AppCompatActivity
         b.putInt("id", item.id);
         i.putExtras(b);
         ActivityCompat.startActivity(this, i, b);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshViews();
     }
 
     @Override

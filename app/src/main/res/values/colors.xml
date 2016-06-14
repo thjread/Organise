@@ -6,12 +6,12 @@
     <color name="background">#E0E0E0</color>
     <color name="card_background">#FAFAFA</color>
     <color name="basecard">#6A1B9A</color>
-    <color name="hierarchy1">#B71C1C</color>
-    <color name="hierarchy2">#E65100</color>
+    <color name="hierarchy5">#B71C1C</color>
+    <color name="hierarchy4">#E65100</color>
     <color name="hierarchy3">#9E9D24</color>
-    <color name="hierarchy4">#0D47A1</color>
-    <color name="hierarchy5">#6A1B9A</color>
-    <color name="hierarchy6">#01579B</color>
-    <color name="hierarchy7">#01579B</color>
-    <color name="hierarchy8">#01579B</color>
+    <color name="hierarchy2">#0D47A1</color>
+    <color name="hierarchy1">#6A1B9A</color>
+    <color name="hierarchy6">#6A1B9A</color>
+    <color name="hierarchy7">#0D47A1</color>
+    <color name="hierarchy8">#9E9D24</color>
 </resources>

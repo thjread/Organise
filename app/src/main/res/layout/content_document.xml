@@ -18,6 +18,7 @@
         android:id="@+id/listview"
         android:padding="8dp"
         android:clipToPadding="false"
-        android:divider="@color/background"
-        android:dividerHeight="1dp"/>
+        android:divider="@null"/>
+        <!--android:divider="@color/background"
+        android:dividerHeight="1dp"/>-->
 </LinearLayout>

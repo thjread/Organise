@@ -25,12 +25,14 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.session.AppKeyPair;
 
 import java.io.IOException;
+import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -137,6 +139,21 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void populateViews(OrgFiles files) {
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        Menu menu = navigationView.getMenu();
+        menu.clear();
+        for (int i=0; i<files.getFiles().size(); ++i) {
+            final Org doc = files.getFiles().get(i);
+            menu.add(doc.title).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    GlobalState.setCurrentOrg(doc);
+                    launchDocumentActivity(null, doc.rootItems.get(0));
+                    return true;
+                };
+            });
+        }
+
         final LinearLayout scheduledContainer = (LinearLayout) findViewById(R.id.scheduledtoday);
         final LinearLayout deadlineContainer = (LinearLayout) findViewById(R.id.deadlinesoon);
         scheduledContainer.removeViewsInLayout(1, scheduledContainer.getChildCount()-1);
@@ -148,7 +165,6 @@ public class MainActivity extends AppCompatActivity
             Org org = files.getFiles().get(j);
             for (int i = 0; i < org.items.size(); ++i) {
                 OrgItem item = org.items.get(i);
-                Log.d("thjread.organise", item.title);
                 if (item.deadline != null &&
                         item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE) {
                     if (DateFormatter.days(item.deadline) < 10) {
@@ -257,13 +273,15 @@ public class MainActivity extends AppCompatActivity
 
     private void launchDocumentActivity(View v, OrgItem item) {
         GlobalState.setCurrentOrg(item.document);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+                && v != null) {
             v.findViewById(R.id.item_cardview)
                 .setTransitionName(getString(R.string.item_transition));
         }
-        Intent i = new Intent(v.getContext(), DocumentActivity.class);
+        Intent i = new Intent(this, DocumentActivity.class);
         Bundle b;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+                && v != null) {
             ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
                     v, getString(R.string.item_transition));
             b = options.toBundle();

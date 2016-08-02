@@ -14,10 +14,4 @@
             android:title="Homework.org" />
     </group>
 
-    <group android:id="@+id/menu_settings_group">
-        <item
-            android:icon="@drawable/ic_settings_white_24px"
-            android:title="Settings" />
-    </group>
-
 </menu>

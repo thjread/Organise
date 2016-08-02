@@ -2,8 +2,10 @@ package thjread.organise;
 
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity
 
     private ArrayList<Pair<OrgItem, Pair<View, ViewGroup>>> views;
 
+    final static String dropbox_token_pref = "DROPBOX_ACCESS_TOKEN_PREF";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,7 +100,19 @@ public class MainActivity extends AppCompatActivity
         AndroidAuthSession session = new AndroidAuthSession(appKeys);
         mDBApi = new DropboxAPI<AndroidAuthSession>(session);
 
-        mDBApi.getSession().startOAuth2Authentication(this);
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String token;
+        try {
+            token = sharedPrefs.getString(dropbox_token_pref, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            token = null;
+        }
+        if (token != null) {
+            mDBApi.getSession().setOAuth2AccessToken(token);
+        } else {
+            mDBApi.getSession().startOAuth2Authentication(this);
+        }
 
         OrgFiles files = GlobalState.getFiles();
         try {
@@ -250,8 +266,12 @@ public class MainActivity extends AppCompatActivity
             try {
                 // Required to complete auth, sets the access token on the session
                 mDBApi.getSession().finishAuthentication();
+                String token = mDBApi.getSession().getOAuth2AccessToken();
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                final SharedPreferences.Editor editor = prefs.edit();
+                editor.putString(dropbox_token_pref, token);
+                editor.commit();
 
-                String accessToken = mDBApi.getSession().getOAuth2AccessToken();
                 Log.d("thjread.organise", "success");
                 syncFiles();
             } catch (IllegalStateException e) {

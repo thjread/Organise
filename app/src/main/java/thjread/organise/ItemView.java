@@ -19,7 +19,10 @@ import java.util.ArrayList;
 public class ItemView {
 
     private static ArrayList<Integer> colors;
-    private static Integer base_color;
+    private static int base_color;
+    private static int text_color;
+
+    private static final float INDENT = 24;
 
     public static View getView(OrgItem item, View convertView, ViewGroup parent, boolean indent, boolean do_colors,
                                boolean light) {
@@ -37,9 +40,8 @@ public class ItemView {
             colors.add(ContextCompat.getColor(convertView.getContext(), R.color.hierarchy6));
             colors.add(ContextCompat.getColor(convertView.getContext(), R.color.hierarchy7));
             colors.add(ContextCompat.getColor(convertView.getContext(), R.color.hierarchy8));
-        }
-        if (base_color == null) {
             base_color = ContextCompat.getColor(convertView.getContext(), R.color.basecard);
+            text_color = ContextCompat.getColor(convertView.getContext(), R.color.itemview_textcolor);
         }
 
         TextView headline = (TextView) convertView.findViewById(R.id.headline);
@@ -94,13 +96,13 @@ public class ItemView {
         if (indent) {
             Context context = convertView.getContext();
             final float scale = context.getResources().getDisplayMetrics().density;
-            int paddingStart = Math.round(30 * scale * (item.treeLevel - 1));
+            int paddingStart = Math.round(INDENT * scale * (item.treeLevel - 1));
             LinearLayout container = (LinearLayout) convertView.findViewById(R.id.item_container);
             container.setPaddingRelative(paddingStart, container.getPaddingTop(),
                     container.getPaddingEnd(), container.getPaddingBottom());
         }
 
-        int color = getColor(item, do_colors, light);
+        int color = getColor(item, do_colors, light, keywordType == Org.Keyword.DONE_KEYWORD_TYPE);
         CardView card_view = (CardView) convertView.findViewById(R.id.item_cardview);
         card_view.setBackgroundColor(color);
 
@@ -108,18 +110,17 @@ public class ItemView {
             headline.setTextColor(lightenColor(color, 0.5f));
             deadline.setTextColor(lightenColor(color, 0.5f));
             deadlineText.setTextColor(lightenColor(color, 0.5f));
-            card_view.setBackgroundColor(lightenColor(color, 0.2f));
             int key_color = Color.parseColor("#00C853");
             keyword.setTextColor(ColorUtils.blendARGB(key_color, color, 0.3f));
         } else {
-            headline.setTextColor(Color.parseColor("#F5F5F5"));
-            deadline.setTextColor(Color.parseColor("#E0E0E0"));
-            deadlineText.setTextColor(Color.parseColor("#E0E0E0"));
+            headline.setTextColor(text_color);
+            deadline.setTextColor(text_color);
+            deadlineText.setTextColor(text_color);
         }
         return convertView;
     }
 
-    public static int getColor(OrgItem item, boolean do_colors, boolean light) { //Must call getView first to populate colors
+    public static int getColor(OrgItem item, boolean do_colors, boolean light, boolean done) { //Must call getView first to populate colors
         int color;
         if (do_colors) {
             color = colors.get((item.treeLevel - 1) % 8);
@@ -127,7 +128,11 @@ public class ItemView {
             color = base_color;
         }
         if (light) {
-            return lightColor(color);
+            color = lightColor(color);
+        }
+
+        if (done) {
+            return lightenColor(color, 0.2f);
         } else {
             return color;
         }

@@ -143,6 +143,9 @@ public class OrgItem {
 
     public void nextKeyword() {
         keyword = (keyword+1) % (keywords.getMaxKeyword() + 1);
+        if (keywords.keywordType(keyword) == Org.Keyword.DONE_KEYWORD_TYPE) {
+            closed = new Date();
+        }
     }
 
     public boolean parse(OrgFile file) { //http://orgmode.org/worg/dev/org-syntax.html

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.app.Fragment;
@@ -36,13 +37,19 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.android.AndroidAuthSession;
+import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.session.AppKeyPair;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+            SyncFilesCallback{
 
     private ArrayList<OrgItem> scheduledToday;
     private ArrayList<OrgItem> deadlineSoon;
@@ -82,36 +89,55 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        final LinearLayout scheduledContainer = (LinearLayout) findViewById(R.id.scheduledtoday);
-        final LinearLayout deadlineContainer = (LinearLayout) findViewById(R.id.deadlinesoon);
-        scheduledToday = new ArrayList<OrgItem>();
-        deadlineSoon = new ArrayList<OrgItem>();
+        APP_KEY = this.getResources().getString(R.string.dropbox_app_key);
+        APP_SECRET = this.getResources().getString(R.string.dropbox_app_secret);
+
+        AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
+        AndroidAuthSession session = new AndroidAuthSession(appKeys);
+        mDBApi = new DropboxAPI<AndroidAuthSession>(session);
+
+        mDBApi.getSession().startOAuth2Authentication(this);
 
         OrgFiles files = GlobalState.getFiles();
-
         try {
             files.loadFiles(this);
-            Org org = new Org(files.getFiles().get(0));
-            GlobalState.setCurrentOrg(org);
-            for (int i=0; i<org.items.size(); ++i) {
-                OrgItem item = org.items.get(i);
-                if (item.deadline != null &&
-                        item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE) {
-                    if (DateFormatter.days(item.deadline) < 5) {
-                        deadlineSoon.add(item);
-                    }
-                }
-                if (item.scheduled != null) {
-                    int days = DateFormatter.days(item.scheduled);
-                    if (days == 0 ||
-                            (item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE
-                                    && days <= 0)) {//TODO use done date
-                        scheduledToday.add(item);
-                    }
-                }
-            }
+            populateViews(files);
         } catch (IOException e) {
 
+        }
+    }
+
+    public void syncFiles() {
+        OrgFiles files = GlobalState.getFiles();
+        files.syncFiles(this, mDBApi, this);
+    }
+
+    public void populateViews(OrgFiles files) {
+        final LinearLayout scheduledContainer = (LinearLayout) findViewById(R.id.scheduledtoday);
+        final LinearLayout deadlineContainer = (LinearLayout) findViewById(R.id.deadlinesoon);
+        scheduledContainer.removeViewsInLayout(1, scheduledContainer.getChildCount()-1);
+        scheduledToday = new ArrayList<OrgItem>();
+        deadlineContainer.removeViewsInLayout(1, deadlineContainer.getChildCount()-1);
+        deadlineSoon = new ArrayList<OrgItem>();
+
+        Org org = new Org(files.getFiles().get(0));
+        GlobalState.setCurrentOrg(org);
+        for (int i=0; i<org.items.size(); ++i) {
+            OrgItem item = org.items.get(i);
+            if (item.deadline != null &&
+                    item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE) {
+                if (DateFormatter.days(item.deadline) < 10) {
+                    deadlineSoon.add(item);
+                }
+            }
+            if (item.scheduled != null) {
+                int days = DateFormatter.days(item.scheduled);
+                if (days == 0 ||
+                        (item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE
+                                && days <= 0)) {//TODO use done date
+                    scheduledToday.add(item);
+                }
+            }
         }
 
         class ScheduledComparator implements Comparator<OrgItem> {
@@ -170,7 +196,24 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public void syncFilesCallback(final OrgFiles files) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                populateViews(files);
+            }
+        });
+    }
+
+    static private String APP_KEY;
+    static private String APP_SECRET;
+    private DropboxAPI<AndroidAuthSession> mDBApi;
+
     private void refreshViews() {
+        if (views == null) {
+            return;
+        }
+
         for (int i=0; i<views.size(); ++i) {
             Pair<OrgItem, Pair<View, ViewGroup>> it = views.get(i);
             OrgItem item = it.t;
@@ -203,6 +246,19 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
+        if (mDBApi.getSession().authenticationSuccessful()) {
+            try {
+                // Required to complete auth, sets the access token on the session
+                mDBApi.getSession().finishAuthentication();
+
+                String accessToken = mDBApi.getSession().getOAuth2AccessToken();
+                Log.d("thjread.organise", "success");
+                syncFiles();
+            } catch (IllegalStateException e) {
+                Log.i("DbAuthLog", "Error authenticating", e);
+            }
+        }
+
         refreshViews();
     }
 

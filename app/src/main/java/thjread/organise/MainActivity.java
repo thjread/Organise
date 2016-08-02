@@ -3,25 +3,16 @@ package thjread.organise;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.DocumentsContract;
-import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.app.Fragment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.transition.ChangeBounds;
-import android.transition.Explode;
-import android.transition.Fade;
-import android.transition.Transition;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -33,15 +24,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.animation.BounceInterpolator;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
-import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.session.AppKeyPair;
 
 import java.io.IOException;
@@ -51,7 +37,8 @@ import java.util.Comparator;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-            SyncFilesCallback{
+            SyncFilesCallback,
+            SwipeRefreshLayout.OnRefreshListener {
 
     private ArrayList<OrgItem> scheduledToday;
     private ArrayList<OrgItem> deadlineSoon;
@@ -59,6 +46,8 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<Pair<OrgItem, Pair<View, ViewGroup>>> views;
 
     final static String dropbox_token_pref = "DROPBOX_ACCESS_TOKEN_PREF";
+
+    private SwipeRefreshLayout swipeRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,12 +82,28 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
+        swipeRefresh.setColorSchemeColors(getResources().getColor(R.color.hierarchy1)
+                , getResources().getColor(R.color.hierarchy2)
+                , getResources().getColor(R.color.hierarchy3)
+                , getResources().getColor(R.color.hierarchy4)
+                , getResources().getColor(R.color.hierarchy5));
+        swipeRefresh.setOnRefreshListener(this);
+
+        OrgFiles files = GlobalState.getFiles();
+        try {
+            files.loadFiles(this);
+            populateViews(files);
+        } catch (IOException e) {
+
+        }
+
         APP_KEY = this.getResources().getString(R.string.dropbox_app_key);
         APP_SECRET = this.getResources().getString(R.string.dropbox_app_secret);
 
         AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
         AndroidAuthSession session = new AndroidAuthSession(appKeys);
-        mDBApi = new DropboxAPI<AndroidAuthSession>(session);
+        mDBApi = new DropboxAPI<>(session);
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         String token;
@@ -110,17 +115,20 @@ public class MainActivity extends AppCompatActivity
         }
         if (token != null) {
             mDBApi.getSession().setOAuth2AccessToken(token);
+            swipeRefresh.post(new Runnable() {
+                @Override
+                public void run() {
+                    swipeRefresh.setRefreshing(true);
+                    syncFiles();
+                }
+            });
         } else {
             mDBApi.getSession().startOAuth2Authentication(this);
         }
+    }
 
-        OrgFiles files = GlobalState.getFiles();
-        try {
-            files.loadFiles(this);
-            populateViews(files);
-        } catch (IOException e) {
-
-        }
+    public void onRefresh() {
+        syncFiles();
     }
 
     public void syncFiles() {
@@ -132,9 +140,9 @@ public class MainActivity extends AppCompatActivity
         final LinearLayout scheduledContainer = (LinearLayout) findViewById(R.id.scheduledtoday);
         final LinearLayout deadlineContainer = (LinearLayout) findViewById(R.id.deadlinesoon);
         scheduledContainer.removeViewsInLayout(1, scheduledContainer.getChildCount()-1);
-        scheduledToday = new ArrayList<OrgItem>();
+        scheduledToday = new ArrayList<>();
         deadlineContainer.removeViewsInLayout(1, deadlineContainer.getChildCount()-1);
-        deadlineSoon = new ArrayList<OrgItem>();
+        deadlineSoon = new ArrayList<>();
 
         Org org = new Org(files.getFiles().get(0));
         GlobalState.setCurrentOrg(org);
@@ -210,13 +218,18 @@ public class MainActivity extends AppCompatActivity
                 }
             });
         }
+
+        scheduledContainer.requestLayout();
+        deadlineContainer.requestLayout();
     }
 
     public void syncFilesCallback(final OrgFiles files) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                Log.d("thjread.organise", "Dropbox synced");
                 populateViews(files);
+                swipeRefresh.setRefreshing(false);
             }
         });
     }
@@ -264,15 +277,12 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         if (mDBApi.getSession().authenticationSuccessful()) {
             try {
-                // Required to complete auth, sets the access token on the session
                 mDBApi.getSession().finishAuthentication();
                 String token = mDBApi.getSession().getOAuth2AccessToken();
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
                 final SharedPreferences.Editor editor = prefs.edit();
                 editor.putString(dropbox_token_pref, token);
-                editor.commit();
-
-                Log.d("thjread.organise", "success");
+                editor.apply();
                 syncFiles();
             } catch (IllegalStateException e) {
                 Log.i("DbAuthLog", "Error authenticating", e);
@@ -314,7 +324,6 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.

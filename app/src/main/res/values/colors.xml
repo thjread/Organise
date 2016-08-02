@@ -15,4 +15,6 @@
     <color name="hierarchy7">#0D47A1</color>
     <color name="hierarchy8">#9E9D24</color>
     <color name="itemview_textcolor">#F5F5F5</color>
+    <color name="refresh_progress_1">@color/colorPrimary</color>
+    <color name="refresh_progress_3">@color/colorAccent</color>
 </resources>

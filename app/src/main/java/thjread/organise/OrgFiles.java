@@ -33,7 +33,6 @@ public class OrgFiles {
                     callback, this);
             task.execute();
 
-            Log.d("thjread.organise", "helloooo");
         } catch (FileNotFoundException e) {//TODO deal with properly
             Log.d("thjread.organise", e.getMessage());
         } catch (IOException e) {
@@ -64,11 +63,11 @@ public class OrgFiles {
         protected DropboxAPI.DropboxFileInfo doInBackground(Void... params) {
             try {
                 DropboxAPI.DropboxFileInfo info = mDBApi.getFile(filePath, null, fileOutputStream, null);
-                files = new ArrayList<OrgFile>();
+                files = new ArrayList<>();
                 try {
                     files.add(new OrgFile("Todo.org", context));
                 } catch (IOException e) {
-
+                    Log.d("thjread.organise", e.toString());
                 }
                 callback.syncFilesCallback(orgfiles);
                 return info;
@@ -77,7 +76,7 @@ public class OrgFiles {
             }
             return null;
         }
-    };
+    }
 
     public List<OrgFile> getFiles() {
         return files;

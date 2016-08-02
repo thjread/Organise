@@ -17,31 +17,48 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrgFiles {
-    ArrayList<OrgFile> files;
+    ArrayList<Org> files;
+
+    OrgFiles () {
+        files = new ArrayList<>();
+    }
+
+    public void addDocument(Org document) {
+        for (int i=0; i<files.size(); ++i) {
+            if (files.get(i).title.equals(document.title)) {
+                files.set(i, document);
+                return;
+            }
+        }
+
+        files.add(document);
+    }
 
     public void loadFiles(Context context) throws IOException {
-        files = new ArrayList<OrgFile>();
-        files.add(new OrgFile("Todo.org", context));
+        addDocument(new Org(new OrgFile("Todo.org", context)));
     }
 
     public void syncFiles(Context context, DropboxAPI<AndroidAuthSession> mDBApi, SyncFilesCallback callback) {
+        syncFile(context, mDBApi, callback, "Todo.org");
+        syncFile(context, mDBApi, callback, "Test.org");
+    }
+
+    public void syncFile(Context context, DropboxAPI<AndroidAuthSession> mDBApi, SyncFilesCallback callback,
+                         String filePath) {
         try {
-            File file = new File(context.getFilesDir() + "Todo.org");
+            File file = new File(context.getFilesDir() + filePath);
             FileOutputStream outputStream = new FileOutputStream(file);
 
-            DropboxDownloadTask task = new DropboxDownloadTask(mDBApi, outputStream, "/Todo.org", context,
+            DropboxDownloadTask task = new DropboxDownloadTask(mDBApi, outputStream, filePath, context,
                     callback, this);
             task.execute();
 
         } catch (FileNotFoundException e) {//TODO deal with properly
             Log.d("thjread.organise", e.getMessage());
-        } catch (IOException e) {
-
         }
-
     }
 
-    class DropboxDownloadTask extends AsyncTask<Void, Void, DropboxAPI.DropboxFileInfo> {
+    class DropboxDownloadTask extends AsyncTask<Void, Void, Void> {
         private DropboxAPI<AndroidAuthSession> mDBApi;
         private FileOutputStream fileOutputStream;
         private String filePath;
@@ -60,25 +77,31 @@ public class OrgFiles {
             this.orgfiles = orgfiles;
         }
 
-        protected DropboxAPI.DropboxFileInfo doInBackground(Void... params) {
+        protected Void doInBackground(Void... params) {
             try {
-                DropboxAPI.DropboxFileInfo info = mDBApi.getFile(filePath, null, fileOutputStream, null);
-                files = new ArrayList<>();
-                try {
-                    files.add(new OrgFile("Todo.org", context));
-                } catch (IOException e) {
-                    Log.d("thjread.organise", e.toString());
+                DropboxAPI.Entry meta = mDBApi.metadata("/org", 100, null, true, null);
+                for (int i=0; i<meta.contents.size(); ++i) {
+                    String path = meta.contents.get(i).path;
+                    String filename = meta.contents.get(i).fileName();
+
+                    File file = new File(context.getFilesDir() + filename);
+                    FileOutputStream outputStream = new FileOutputStream(file);
+
+                    mDBApi.getFile(path, null, outputStream, null);
+                    addDocument(new Org(new OrgFile(filename, context)));
                 }
-                callback.syncFilesCallback(orgfiles);
-                return info;
-            } catch (DropboxException e) {
+            } catch (DropboxException e) {//TODO
                 Log.d("thjread.organise", e.toString());
+            } catch (IOException e) {
+
             }
+
+            callback.syncFilesCallback(orgfiles);
             return null;
         }
     }
 
-    public List<OrgFile> getFiles() {
+    public List<Org> getFiles() {
         return files;
     }
 }
@@ -86,3 +109,4 @@ public class OrgFiles {
 interface SyncFilesCallback {
     void syncFilesCallback(OrgFiles files);
 }
+

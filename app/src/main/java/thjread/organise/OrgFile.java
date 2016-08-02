@@ -14,8 +14,9 @@ import java.util.ArrayList;
 
 public class OrgFile {
     ArrayList<String> file;
+    String title;
 
-    public OrgFile(int id, Context context) throws IOException {
+    public OrgFile(int id, String title, Context context) throws IOException {
         file = new ArrayList<String>();
 
         InputStream is = context.getResources().openRawResource(id);
@@ -27,6 +28,8 @@ public class OrgFile {
             }
         }
         is.close();
+
+        this.title = title;
     }
 
     public OrgFile(String filePath, Context context) throws IOException {
@@ -39,6 +42,8 @@ public class OrgFile {
             file.add(str);
         }
         reader.close();
+
+        this.title = filePath;
     }
 
     public boolean isEmpty() {

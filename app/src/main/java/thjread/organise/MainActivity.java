@@ -144,22 +144,24 @@ public class MainActivity extends AppCompatActivity
         deadlineContainer.removeViewsInLayout(1, deadlineContainer.getChildCount()-1);
         deadlineSoon = new ArrayList<>();
 
-        Org org = new Org(files.getFiles().get(0));
-        GlobalState.setCurrentOrg(org);
-        for (int i=0; i<org.items.size(); ++i) {
-            OrgItem item = org.items.get(i);
-            if (item.deadline != null &&
-                    item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE) {
-                if (DateFormatter.days(item.deadline) < 10) {
-                    deadlineSoon.add(item);
+        for (int j=0; j<files.getFiles().size(); ++j) {
+            Org org = files.getFiles().get(j);
+            for (int i = 0; i < org.items.size(); ++i) {
+                OrgItem item = org.items.get(i);
+                Log.d("thjread.organise", item.title);
+                if (item.deadline != null &&
+                        item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE) {
+                    if (DateFormatter.days(item.deadline) < 10) {
+                        deadlineSoon.add(item);
+                    }
                 }
-            }
-            if (item.scheduled != null) {
-                int days = DateFormatter.days(item.scheduled);
-                if (days == 0 ||
-                        (item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE
-                                && days <= 0)) {//TODO use done date
-                    scheduledToday.add(item);
+                if (item.scheduled != null) {
+                    int days = DateFormatter.days(item.scheduled);
+                    if (days == 0 ||
+                            (item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE
+                                    && days <= 0)) {//TODO use done date
+                        scheduledToday.add(item);
+                    }
                 }
             }
         }
@@ -254,6 +256,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void launchDocumentActivity(View v, OrgItem item) {
+        GlobalState.setCurrentOrg(item.document);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             v.findViewById(R.id.item_cardview)
                 .setTransitionName(getString(R.string.item_transition));

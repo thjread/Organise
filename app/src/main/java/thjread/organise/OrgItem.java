@@ -20,6 +20,7 @@ public class OrgItem {
     Date closed;
 
     OrgItem parent;
+    Org document;
 
     ArrayList<Integer> all_child_ids;
 
@@ -41,7 +42,8 @@ public class OrgItem {
 
     int child_number;
 
-    public OrgItem(Org.Keyword keywords, ArrayList<OrgItem> items, OrgItem parent, int child_number) {
+    public OrgItem(Org.Keyword keywords, ArrayList<OrgItem> items, OrgItem parent, int child_number,
+                   Org document) {
         this.keywords = keywords;
         this.items = items;
         children = new ArrayList<OrgItem>();
@@ -55,11 +57,12 @@ public class OrgItem {
         all_child_ids.add(this.id);
         this.parent = parent;
         this.child_number = child_number;
+        this.document = document;
     }
     
     public OrgItem(Org.Keyword keywords, String title, Date scheduled,
                    Date deadline, Date closed, int keyword, int treeLevel, ArrayList<OrgItem> items,
-                   OrgItem parent, int child_number) {
+                   OrgItem parent, int child_number, Org document) {
         this.keywords = keywords;
         this.title = title;
         this.scheduled = scheduled;
@@ -76,6 +79,7 @@ public class OrgItem {
         all_child_ids.add(this.id);
         this.parent = parent;
         this.child_number = child_number;
+        this.document = document;
     }
 
     public void addChild(OrgItem child) {
@@ -168,7 +172,7 @@ public class OrgItem {
             if (tokens.length != 0) {
                 int stars = starNum(tokens[0]);
                 if (stars > treeLevel) {
-                    OrgItem item = new OrgItem(keywords, items, this, this.children.size());
+                    OrgItem item = new OrgItem(keywords, items, this, this.children.size(), document);
                     item.parse(file);
                     this.addChild(item);
                     items.add(item);

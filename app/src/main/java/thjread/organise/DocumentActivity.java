@@ -35,9 +35,11 @@ public class DocumentActivity extends AppCompatActivity {
             id = b.getInt("id");
         }
 
+        Org org = GlobalState.getCurrentOrg();
+
         setContentView(R.layout.activity_document);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Todo.org");
+        toolbar.setTitle(org.title);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -45,7 +47,6 @@ public class DocumentActivity extends AppCompatActivity {
         listView = (ListView) findViewById(R.id.listview);
         listItems = new ArrayList<>();
 
-        Org org = GlobalState.getCurrentOrg();
         org.resetExpanded();
 
         for (int i=0; i<org.rootItems.size(); ++i) {

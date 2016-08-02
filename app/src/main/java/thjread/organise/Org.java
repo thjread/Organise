@@ -8,6 +8,7 @@ import java.util.HashMap;
 public class Org {
     public ArrayList<OrgItem> rootItems;
     public ArrayList<OrgItem> items;
+    public String title;
 
     public class Keyword {
         public ArrayList<String> todoKeywords;
@@ -114,12 +115,14 @@ public class Org {
         items = new ArrayList<>();
 
         while (!file.isEmpty()) {
-            OrgItem item = new OrgItem(keyword, items, null, rootItems.size());
+            OrgItem item = new OrgItem(keyword, items, null, rootItems.size(), this);
             if (item.parse(file)) {
                 rootItems.add(item);
                 items.add(item);
             }
         }
+
+        title = file.title;
     }
 
     public void resetExpanded() {

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,29 +14,15 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class OrgFile {
+    File f;
     ArrayList<String> file;
     String title;
 
-    public OrgFile(int id, String title, Context context) throws IOException {
-        file = new ArrayList<String>();
-
-        InputStream is = context.getResources().openRawResource(id);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        if (is != null) {
-            String str = "";
-            while ((str = reader.readLine()) != null) {
-                file.add(str);
-            }
-        }
-        is.close();
-
-        this.title = title;
-    }
-
     public OrgFile(String filePath, Context context) throws IOException {
-        file = new ArrayList<String>();
+        file = new ArrayList<>();
 
-        File f = new File(context.getFilesDir() + filePath);
+        File doc_dir = context.getDir("doc_dir", Context.MODE_PRIVATE);
+        f = new File(doc_dir, filePath);
         BufferedReader reader = new BufferedReader(new FileReader(f));
         String str = "";
         while ((str = reader.readLine()) != null) {
@@ -44,6 +31,33 @@ public class OrgFile {
         reader.close();
 
         this.title = filePath;
+    }
+
+    public OrgFile(File f) throws IOException {
+        this.f = f;
+        file = new ArrayList<>();
+
+        BufferedReader reader = new BufferedReader(new FileReader(f));
+        String str = "";
+        while ((str = reader.readLine()) != null) {
+            file.add(str);
+        }
+        reader.close();
+
+        this.title = f.getName();
+    }
+
+    public void write(Org org) {
+        String s = org.serialise();
+        try {
+            String path = f.getAbsolutePath();
+            f.delete();
+            FileOutputStream fo = new FileOutputStream(path, true);
+            fo.write(s.getBytes());
+            fo.close();
+        } catch (IOException e) {
+            Log.d("thjread.organise", e.toString());
+        }
     }
 
     public boolean isEmpty() {

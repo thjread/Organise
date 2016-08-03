@@ -35,43 +35,30 @@ public class OrgFiles {
     }
 
     public void loadFiles(Context context) throws IOException {
-        addDocument(new Org(new OrgFile("Todo.org", context)));
+        File doc_dir = context.getDir("doc_dir", Context.MODE_PRIVATE);
+        File[] files = doc_dir.listFiles();
+        for (int i=0; i<files.length; ++i) {
+            addDocument(new Org(new OrgFile(files[i])));
+        }
     }
 
     public void syncFiles(Context context, DropboxAPI<AndroidAuthSession> mDBApi, SyncFilesCallback callback) {
-        syncFile(context, mDBApi, callback, "Todo.org");
-        syncFile(context, mDBApi, callback, "Test.org");
-    }
-
-    public void syncFile(Context context, DropboxAPI<AndroidAuthSession> mDBApi, SyncFilesCallback callback,
-                         String filePath) {
-        try {
-            File file = new File(context.getFilesDir() + filePath);
-            FileOutputStream outputStream = new FileOutputStream(file);
-
-            DropboxDownloadTask task = new DropboxDownloadTask(mDBApi, outputStream, filePath, context,
-                    callback, this);
-            task.execute();
-
-        } catch (FileNotFoundException e) {//TODO deal with properly
-            Log.d("thjread.organise", e.getMessage());
-        }
+        DropboxDownloadTask task = new DropboxDownloadTask(mDBApi, context,
+                callback, this);
+        task.execute();
     }
 
     class DropboxDownloadTask extends AsyncTask<Void, Void, Void> {
         private DropboxAPI<AndroidAuthSession> mDBApi;
-        private FileOutputStream fileOutputStream;
-        private String filePath;
         private Context context;
         private SyncFilesCallback callback;
         private OrgFiles orgfiles;
 
-        DropboxDownloadTask(DropboxAPI<AndroidAuthSession> mDBApi, FileOutputStream fileOutputStream,
-                            String filePath, Context context, SyncFilesCallback callback,
+        DropboxDownloadTask(DropboxAPI<AndroidAuthSession> mDBApi,
+                            Context context,
+                            SyncFilesCallback callback,
                             OrgFiles orgfiles) {
             this.mDBApi = mDBApi;
-            this.fileOutputStream = fileOutputStream;
-            this.filePath = filePath;
             this.context = context;
             this.callback = callback;
             this.orgfiles = orgfiles;
@@ -84,10 +71,12 @@ public class OrgFiles {
                     String path = meta.contents.get(i).path;
                     String filename = meta.contents.get(i).fileName();
 
-                    File file = new File(context.getFilesDir() + filename);
+                    File doc_dir = context.getDir("doc_dir", Context.MODE_PRIVATE);
+                    File file = new File(doc_dir, filename);
                     FileOutputStream outputStream = new FileOutputStream(file);
 
                     mDBApi.getFile(path, null, outputStream, null);
+                    outputStream.close();
                     addDocument(new Org(new OrgFile(filename, context)));
                 }
             } catch (DropboxException e) {//TODO

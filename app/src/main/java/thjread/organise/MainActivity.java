@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity
             files.loadFiles(this);
             populateViews(files);
         } catch (IOException e) {
-
+            Log.d("thjread.organise", e.toString());
         }
 
         APP_KEY = this.getResources().getString(R.string.dropbox_app_key);
@@ -107,14 +107,7 @@ public class MainActivity extends AppCompatActivity
         AndroidAuthSession session = new AndroidAuthSession(appKeys);
         mDBApi = new DropboxAPI<>(session);
 
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String token;
-        try {
-            token = sharedPrefs.getString(dropbox_token_pref, null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            token = null;
-        }
+        String token = PrefUtils.readPref(this, dropbox_token_pref, null);
         if (token != null) {
             mDBApi.getSession().setOAuth2AccessToken(token);
             swipeRefresh.post(new Runnable() {
@@ -148,7 +141,11 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     GlobalState.setCurrentOrg(doc);
-                    launchDocumentActivity(null, doc.rootItems.get(0));
+                    if (doc.rootItems.size() > 1) {
+                        launchDocumentActivity(null, doc.rootItems.get(1));//Avoid colour snap
+                    } else {
+                        launchDocumentActivity(null, doc.rootItems.get(0));
+                    }
                     return true;
                 };
             });
@@ -174,8 +171,11 @@ public class MainActivity extends AppCompatActivity
                 if (item.scheduled != null) {
                     int days = DateFormatter.days(item.scheduled);
                     if (days == 0 ||
-                            (item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE
-                                    && days <= 0)) {//TODO use done date
+                            ((item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE
+                                    && days <= 0)
+                            || (item.closed != null
+                                    && item.keywords.keywordType(item.keyword) == Org.Keyword.DONE_KEYWORD_TYPE
+                                    && DateFormatter.days(item.closed) == 0))) {
                         scheduledToday.add(item);
                     }
                 }
@@ -300,10 +300,7 @@ public class MainActivity extends AppCompatActivity
             try {
                 mDBApi.getSession().finishAuthentication();
                 String token = mDBApi.getSession().getOAuth2AccessToken();
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-                final SharedPreferences.Editor editor = prefs.edit();
-                editor.putString(dropbox_token_pref, token);
-                editor.apply();
+                PrefUtils.writePref(this, dropbox_token_pref, token);
                 syncFiles();
             } catch (IllegalStateException e) {
                 Log.i("DbAuthLog", "Error authenticating", e);

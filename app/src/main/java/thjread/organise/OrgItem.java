@@ -150,6 +150,40 @@ public class OrgItem {
         if (keywords.keywordType(keyword) == Org.Keyword.DONE_KEYWORD_TYPE) {
             closed = new Date();
         }
+        Log.d("thjread.organise", "writing");
+        document.file.write(document);
+    }
+
+    public String serialise() {
+        String s = "";
+        for (int i=0; i<treeLevel; ++i) {
+            s += "*";
+        }
+        s += " ";
+        s += keywords.intToKeyword(keyword);
+        s += " ";
+        s += title;
+        s += "\n";
+        boolean done_anything = false;
+        if (closed != null && keywords.keywordType(keyword) == Org.Keyword.DONE_KEYWORD_TYPE) {
+            s += "CLOSED: [" + formatTimestamp(closed) + "] ";
+            done_anything = true;
+        }
+        if (scheduled != null) {
+            s += "SCHEDULED: <" + formatTimestamp(scheduled) + "> ";
+            done_anything = true;
+        }
+        if (deadline != null) {
+            s += "DEADLINE: <" + formatTimestamp(deadline) + ">";
+            done_anything = true;
+        }
+        if (done_anything) {
+            s += "\n";
+        }
+        for (int i=0; i<children.size(); ++i) {
+            s += children.get(i).serialise();
+        }
+        return s;
     }
 
     public boolean parse(OrgFile file) { //http://orgmode.org/worg/dev/org-syntax.html
@@ -176,6 +210,8 @@ public class OrgItem {
                     item.parse(file);
                     this.addChild(item);
                     items.add(item);
+                } else if (stars == 0) {
+                    file.removeLine();
                 } else {
                     return true;
                 }
@@ -324,7 +360,8 @@ public class OrgItem {
     }
 
     private Pair<Date, Integer> readTimestamp(String[] tokens, int tokenPointer) {
-        if (tokens[tokenPointer].toCharArray()[0] != '<') {//TODO inactive dates
+        if (tokens[tokenPointer].toCharArray()[0] != '<'
+                && tokens[tokenPointer].toCharArray()[0] != '[') {//TODO inactive dates
             return null;
         }
         ArrayList<String> dateTokens = new ArrayList<String>();
@@ -335,7 +372,8 @@ public class OrgItem {
             if (i == tokenPointer) {
                 token = token.substring(1);
             }
-            if (token.toCharArray()[token.length()-1] == '>') {
+            if (token.toCharArray()[token.length()-1] == '>'
+                    || token.toCharArray()[token.length()-1] == ']') {
                 token = token.substring(0, token.length()-1);
                 finalPointer = i;
                 success = true;
@@ -353,7 +391,12 @@ public class OrgItem {
 
         //TODO times, repeats
 
-        return new Pair<Date, Integer>(d, finalPointer+1);
+        return new Pair<Date, Integer>(d, finalPointer);
+    }
+
+    private String formatTimestamp(Date d) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd EEE");
+        return format.format(d);
     }
 }
 

@@ -2,6 +2,7 @@ package thjread.organise;
 
 import android.util.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -9,6 +10,7 @@ public class Org {
     public ArrayList<OrgItem> rootItems;
     public ArrayList<OrgItem> items;
     public String title;
+    public OrgFile file;
 
     public class Keyword {
         public ArrayList<String> todoKeywords;
@@ -106,6 +108,8 @@ public class Org {
     }
 
     public Org(OrgFile file) {
+        this.file = file;
+
         ArrayList<String> todoKeywords = new ArrayList<>(); todoKeywords.add("TODO");
         ArrayList<String> startedKeywords = new ArrayList<>(); startedKeywords.add("STARTED");
         ArrayList<String> doneKeywords = new ArrayList<>(); doneKeywords.add("DONE");
@@ -123,6 +127,14 @@ public class Org {
         }
 
         title = file.title;
+    }
+
+    public String serialise() {
+        String s = "";
+        for (int i = 0; i < rootItems.size(); ++i) {
+            s += rootItems.get(i).serialise();
+        }
+        return s;
     }
 
     public void resetExpanded() {

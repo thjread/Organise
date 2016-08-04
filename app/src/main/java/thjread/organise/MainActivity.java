@@ -25,14 +25,8 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-
-import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.android.AndroidAuthSession;
-import com.dropbox.client2.session.AppKeyPair;
 
 import java.io.IOException;
-import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,8 +40,6 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<OrgItem> deadlineSoon;
 
     private ArrayList<Pair<OrgItem, Pair<View, ViewGroup>>> views;
-
-    final static String dropbox_token_pref = "DROPBOX_ACCESS_TOKEN_PREF";
 
     private SwipeRefreshLayout swipeRefresh;
 
@@ -100,35 +92,11 @@ public class MainActivity extends AppCompatActivity
             Log.d("thjread.organise", e.toString());
         }
 
-        APP_KEY = this.getResources().getString(R.string.dropbox_app_key);
-        APP_SECRET = this.getResources().getString(R.string.dropbox_app_secret);
-
-        AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
-        AndroidAuthSession session = new AndroidAuthSession(appKeys);
-        mDBApi = new DropboxAPI<>(session);
-
-        String token = PrefUtils.readPref(this, dropbox_token_pref, null);
-        if (token != null) {
-            mDBApi.getSession().setOAuth2AccessToken(token);
-            swipeRefresh.post(new Runnable() {
-                @Override
-                public void run() {
-                    swipeRefresh.setRefreshing(true);
-                    syncFiles();
-                }
-            });
-        } else {
-            mDBApi.getSession().startOAuth2Authentication(this);
-        }
+        Dropbox.init(this, swipeRefresh, this);
     }
 
     public void onRefresh() {
-        syncFiles();
-    }
-
-    public void syncFiles() {
-        OrgFiles files = GlobalState.getFiles();
-        files.syncFiles(this, mDBApi, this);
+        Dropbox.syncFiles(this);
     }
 
     public void populateViews(OrgFiles files) {
@@ -252,10 +220,6 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    static private String APP_KEY;
-    static private String APP_SECRET;
-    private DropboxAPI<AndroidAuthSession> mDBApi;
-
     private void refreshViews() {
         if (views == null) {
             return;
@@ -296,16 +260,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
-        if (mDBApi.getSession().authenticationSuccessful()) {
-            try {
-                mDBApi.getSession().finishAuthentication();
-                String token = mDBApi.getSession().getOAuth2AccessToken();
-                PrefUtils.writePref(this, dropbox_token_pref, token);
-                syncFiles();
-            } catch (IllegalStateException e) {
-                Log.i("DbAuthLog", "Error authenticating", e);
-            }
-        }
+
+        Dropbox.resumeAuth(this);
 
         refreshViews();
     }
@@ -346,20 +302,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        /*if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }*/
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

@@ -12,11 +12,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class OrgFile {
     File f;
     ArrayList<String> file;
     String title;
+    Date lastWrite = null;
 
     public OrgFile(String filePath, Context context) throws IOException {
         file = new ArrayList<>();
@@ -55,6 +57,7 @@ public class OrgFile {
             FileOutputStream fo = new FileOutputStream(path, true);
             fo.write(s.getBytes());
             fo.close();
+            lastWrite = new Date();
         } catch (IOException e) {
             Log.d("thjread.organise", e.toString());
         }

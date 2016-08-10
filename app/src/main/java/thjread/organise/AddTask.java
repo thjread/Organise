@@ -17,34 +17,28 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class AddTask extends DialogFragment {
     private DatePickerDialog datePickerDialog;
     private SimpleDateFormat simpleDateFormat;
 
+    private ArrayList<ArrayList<String>> locations;
+
     @Override
     public AlertDialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("Add task")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                       public void onClick(DialogInterface dialog, int id) {
-                           // FIRE ZE MISSILES!
-                       }
-                 })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog
-                    }
-                });
 
         simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_add_task, null, false);
         view.setPadding(19, 5, 14, 5); //Magic padding values
         builder.setView(view);
+
+        final EditText titleText = (EditText) view.findViewById(R.id.edit_task_name);
 
         final EditText datePick = (EditText) view.findViewById(R.id.edit_task_date);
         datePick.setOnTouchListener(new View.OnTouchListener() {
@@ -64,16 +58,33 @@ public class AddTask extends DialogFragment {
             }
         }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
 
+        builder.setMessage("Add task")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Org doc = GlobalState.getFiles().getFiles().get(0);
+                        OrgItem orgItem = new OrgItem(doc.keyword, null, null, 0, doc);
+                        orgItem.title = titleText.getText().toString();
+                        try {
+                            orgItem.deadline = simpleDateFormat.parse(datePick.getText().toString());
+                        } catch (java.text.ParseException e) {
+
+                        }
+                        orgItem.treeLevel = 1;
+
+                        doc.rootItems.add(orgItem);
+                        doc.items.add(orgItem);
+                        doc.file.write(doc);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+
         // Create the AlertDialog object and return it
         return builder.create();
     }
-
-    /*@Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_add_task, container, false);
-    }*/
 
     @Override
     public void onDetach() {

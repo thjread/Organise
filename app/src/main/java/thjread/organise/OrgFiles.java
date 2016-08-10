@@ -137,7 +137,9 @@ public class OrgFiles {
 
             }
 
-            callback.syncFilesCallback(orgfiles);
+            if (callback != null) {
+                callback.syncFilesCallback(orgfiles);
+            }
             return null;
         }
     }

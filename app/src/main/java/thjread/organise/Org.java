@@ -11,6 +11,7 @@ public class Org {
     public ArrayList<OrgItem> items;
     public String title;
     public OrgFile file;
+    public Keyword keyword;
 
     public class Keyword {
         public ArrayList<String> todoKeywords;
@@ -113,7 +114,7 @@ public class Org {
         ArrayList<String> todoKeywords = new ArrayList<>(); todoKeywords.add("TODO");
         ArrayList<String> startedKeywords = new ArrayList<>(); startedKeywords.add("STARTED");
         ArrayList<String> doneKeywords = new ArrayList<>(); doneKeywords.add("DONE");
-        Keyword keyword = new Keyword(todoKeywords, startedKeywords, doneKeywords);
+        keyword = new Keyword(todoKeywords, startedKeywords, doneKeywords);
 
         rootItems = new ArrayList<>();
         items = new ArrayList<>();

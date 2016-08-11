@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -72,25 +73,32 @@ public class ItemView {
 
         TextView deadline = (TextView) convertView.findViewById(R.id.deadline);
         TextView deadlineText = (TextView) convertView.findViewById(R.id.deadline_text);
-        String deadlineString = "";
-        String deadlineTextString = "";
+        TextView scheduled = (TextView) convertView.findViewById(R.id.scheduled);
+        TextView scheduledText = (TextView) convertView.findViewById(R.id.scheduled_text);
+        Space spacer = (Space) convertView.findViewById(R.id.spacer);
         if (item.deadline != null) {
-            deadlineString = "Deadline: ";
-            deadlineTextString = DateFormatter.format(item.deadline, true);
-        }
-        if (item.scheduled != null) {
-            deadlineString = "Scheduled: ";
-            deadlineTextString = DateFormatter.format(item.scheduled, false);
-        }
-
-        if (!deadlineString.equals("")) {
+            deadline.setText("Deadline: ");
+            deadlineText.setText(DateFormatter.format(item.deadline, true));
             deadline.setVisibility(View.VISIBLE);
             deadlineText.setVisibility(View.VISIBLE);
-            deadline.setText(deadlineString);
-            deadlineText.setText(deadlineTextString);
         } else {
             deadline.setVisibility(View.GONE);
             deadlineText.setVisibility(View.GONE);
+        }
+        if (item.scheduled != null) {
+            scheduled.setText("Scheduled: ");
+            scheduledText.setText(DateFormatter.format(item.scheduled, false));
+            scheduled.setVisibility(View.VISIBLE);
+            scheduledText.setVisibility(View.VISIBLE);
+        } else {
+            scheduled.setVisibility(View.GONE);
+            scheduledText.setVisibility(View.GONE);
+        }
+
+        if (item.scheduled != null && item.deadline != null) {
+            spacer.setVisibility(View.VISIBLE);
+        } else {
+            spacer.setVisibility(View.GONE);
         }
 
         if (indent) {
@@ -110,12 +118,16 @@ public class ItemView {
             headline.setTextColor(lightenColor(color, 0.5f));
             deadline.setTextColor(lightenColor(color, 0.5f));
             deadlineText.setTextColor(lightenColor(color, 0.5f));
+            scheduled.setTextColor(lightenColor(color, 0.5f));
+            scheduledText.setTextColor(lightenColor(color, 0.5f));
             int key_color = Color.parseColor("#00C853");
             keyword.setTextColor(ColorUtils.blendARGB(key_color, color, 0.3f));
         } else {
             headline.setTextColor(text_color);
             deadline.setTextColor(text_color);
             deadlineText.setTextColor(text_color);
+            scheduled.setTextColor(text_color);
+            scheduledText.setTextColor(text_color);
         }
         return convertView;
     }

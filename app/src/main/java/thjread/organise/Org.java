@@ -5,6 +5,7 @@ import android.util.Log;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Org {
     public ArrayList<OrgItem> rootItems;
@@ -128,6 +129,36 @@ public class Org {
         }
 
         title = file.title;
+    }
+
+    public OrgItem getItem(List<String> path) {
+        return this.getItem(path, rootItems);
+    }
+
+    public OrgItem getItem(List<String> path, List<OrgItem> list) {
+        for (OrgItem item: list) {
+            if (item.title.equals(path.get(0))) {
+                if (path.size() == 1) {
+                    return item;
+                } else {
+                    return getItem(path.subList(1, path.size()), item.children);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public void addItem(OrgItem parent, OrgItem item) {
+        items.add(item);
+        if (parent == null) {
+            item.child_number = rootItems.size();
+            rootItems.add(item);
+        } else {
+            item.child_number = parent.children.size();
+            parent.addChild(item);
+        }
+        this.file.write(this);
     }
 
     public String serialise() {

@@ -44,6 +44,15 @@ public class OrgFiles {
         }
     }
 
+    public OrgItem getItem(List<String> path) {
+        Org doc = this.getDocument(path.get(0));
+        return doc.getItem(path.subList(1, path.size()));
+    }
+
+    public Org getDocument(String title) {
+        return fileMap.get(title);
+    }
+
     public void loadFiles(Context context) throws IOException {
         File doc_dir = context.getDir("doc_dir", Context.MODE_PRIVATE);
         File[] files = doc_dir.listFiles();

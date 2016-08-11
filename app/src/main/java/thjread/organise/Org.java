@@ -153,7 +153,7 @@ public class Org {
     public void addItem(OrgItem parent, OrgItem item, Integer childNumber) {
         items.add(item);
         if (parent == null) {
-            if (childNumber == null) {
+            if (childNumber == null || childNumber == rootItems.size()) {
                 item.child_number = rootItems.size();
                 rootItems.add(item);
             } else {
@@ -164,7 +164,7 @@ public class Org {
                 rootItems.add(childNumber, item);
             }
         } else {
-            if (childNumber == null) {
+            if (childNumber == null || childNumber == parent.children.size()) {
                 item.child_number = parent.children.size();
                 parent.addChild(item);
             } else {

@@ -92,7 +92,6 @@ public class DocumentActivity extends AppCompatActivity {
         Fragment itemAction = ItemAction.newInstance(item);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(itemAction, null);
-        ft.addToBackStack(null);
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         ft.commit();
     }

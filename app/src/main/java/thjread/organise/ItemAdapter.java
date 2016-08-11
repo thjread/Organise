@@ -3,38 +3,38 @@ package thjread.organise;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
-import android.content.ClipData;
 import android.content.Context;
 import android.os.Build;
-import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by tread on 07/06/16.
  */
+
 public class ItemAdapter extends ArrayAdapter<OrgItem> {
+
+    public interface LongTapListener {
+        void onLongTap(OrgItem item);
+    }
+
     private Integer animateId;
     public boolean hasSetTransitionName = false;
     public CardView transitionView;
     private ArrayList<OrgItem> items;
+    private LongTapListener longTapListener;
 
-    public ItemAdapter(Context context, ArrayList<OrgItem> items, int animateId) {
+    public ItemAdapter(Context context, ArrayList<OrgItem> items, int animateId, LongTapListener longTapListener) {
         super(context, 0, items);
         this.animateId = animateId;
         this.items = items;
+        this.longTapListener = longTapListener;
     }
 
     @Override
@@ -81,6 +81,10 @@ public class ItemAdapter extends ArrayAdapter<OrgItem> {
             public void onTap() {
                 item.toggleExpanded(items, adapter, position);
                 adapter.notifyDataSetChanged();
+            }
+
+            public void onLongTap() {
+                longTapListener.onLongTap(item);
             }
         });
 

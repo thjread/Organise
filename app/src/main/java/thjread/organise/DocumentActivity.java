@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -54,7 +57,12 @@ public class DocumentActivity extends AppCompatActivity {
             listItems.add(item);
         }
 
-        adapter = new ItemAdapter(this, listItems, id);
+        adapter = new ItemAdapter(this, listItems, id, new ItemAdapter.LongTapListener() {
+            @Override
+            public void onLongTap(OrgItem item) {
+                launchItemActionFragment(item);
+            }
+        });
         listView.setAdapter(adapter);
 
         if (id != -1) {
@@ -78,6 +86,15 @@ public class DocumentActivity extends AppCompatActivity {
                 });
             }
         }
+    }
+
+    private void launchItemActionFragment(OrgItem item) {
+        Fragment itemAction = ItemAction.newInstance(item);
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.add(itemAction, null);
+        ft.addToBackStack(null);
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        ft.commit();
     }
 
     private OrgItem expandItemWithId(int id, ArrayList<OrgItem> list) {

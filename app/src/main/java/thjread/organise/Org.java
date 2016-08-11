@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -149,14 +150,39 @@ public class Org {
         return null;
     }
 
-    public void addItem(OrgItem parent, OrgItem item) {
+    public void addItem(OrgItem parent, OrgItem item, Integer childNumber) {
         items.add(item);
         if (parent == null) {
-            item.child_number = rootItems.size();
-            rootItems.add(item);
+            if (childNumber == null) {
+                item.child_number = rootItems.size();
+                rootItems.add(item);
+            } else {
+                item.child_number = childNumber;
+                for (int i=childNumber; i<rootItems.size(); ++i) {
+                    rootItems.get(i).child_number += 1;
+                }
+                rootItems.add(childNumber, item);
+            }
         } else {
-            item.child_number = parent.children.size();
-            parent.addChild(item);
+            if (childNumber == null) {
+                item.child_number = parent.children.size();
+                parent.addChild(item);
+            } else {
+                item.child_number = childNumber;
+                for (int i=childNumber; i<parent.children.size(); ++i) {
+                    parent.children.get(i).child_number += 1;
+                }
+                parent.children.add(childNumber, item);
+            }
+        }
+        this.file.write(this);
+    }
+
+    public void deleteItem(OrgItem item) {
+        OrgItem parent = item.parent;
+        parent.children.remove(item);
+        for (int i=item.child_number+1; i<parent.children.size(); ++i) {
+            parent.children.get(i).child_number -= 1;
         }
         this.file.write(this);
     }

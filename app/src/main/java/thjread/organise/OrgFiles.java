@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +47,11 @@ public class OrgFiles {
 
     public OrgItem getItem(List<String> path) {
         Org doc = this.getDocument(path.get(0));
-        return doc.getItem(path.subList(1, path.size()));
+        if (path.size() > 1 && doc != null) {
+            return doc.getItem(path.subList(1, path.size()));
+        } else {
+            return null;
+        }
     }
 
     public Org getDocument(String title) {

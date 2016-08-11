@@ -1,0 +1,37 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="thjread.organise.ItemAction">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/task_action_add_child"
+            android:text="Add child"
+            style="@style/Widget.AppCompat.Button.Colored"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/task_action_add_sibling"
+            android:text="Add sibling"
+            style="@style/Widget.AppCompat.Button.Colored"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/task_action_edit_task"
+            android:text="Edit task"
+            style="@style/Widget.AppCompat.Button.Colored"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/task_action_delete"
+            android:text="Delete"
+            style="@style/Widget.AppCompat.Button.Colored"/>
+    </LinearLayout>
+</FrameLayout>

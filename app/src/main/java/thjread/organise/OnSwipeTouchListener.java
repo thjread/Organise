@@ -1,6 +1,7 @@
 package thjread.organise;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -73,6 +74,11 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
             }
             return true;
         }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+            onLongTap();
+        }
     }
 
     public void onSwipeRight() {
@@ -85,6 +91,9 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
     }
 
     public void onSwipeBottom() {
+    }
+
+    public void onLongTap() {
     }
 
     public void onTap() {

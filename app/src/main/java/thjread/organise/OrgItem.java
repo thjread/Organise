@@ -82,6 +82,20 @@ public class OrgItem {
         this.document = document;
     }
 
+    public ArrayList<String> getPath() {
+        ArrayList<String> path;
+        if (parent != null) {
+            path = parent.getPath();
+        } else {
+            path = new ArrayList<>();
+            path.add(document.title);
+        }
+
+        path.add(title);
+
+        return path;
+    }
+
     public void addChild(OrgItem child) {
         children.add(child);
         this.addChildIds(child);

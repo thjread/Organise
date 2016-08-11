@@ -1,37 +1,25 @@
 package thjread.organise;
 
-import android.app.Activity;
-import android.app.AlertDialog;
+import android.support.v7.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.content.Context;
+import android.support.v7.app.AppCompatDialogFragment;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Spinner;
-import android.widget.TextView;
 
-import org.w3c.dom.Text;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
-public class AddTask extends DialogFragment {
+public class AddTask extends AppCompatDialogFragment {
     private ArrayList<String> locations;
 
     class FinalBoolean {
@@ -42,9 +30,47 @@ public class AddTask extends DialogFragment {
         }
     }
 
+    private static final String ARG_PATH = "path";
+    private static final String ARG_CHILD_NUMBER = "child_number";
+    private OrgItem item;
+    private Integer childNumber;
+
+    public static AddTask newInstance(OrgItem item, Integer childNumber) {
+        AddTask fragment = new AddTask();
+        Bundle args = new Bundle();
+        if (item != null) {
+            ArrayList<String> path = item.getPath();
+            String pathString = "";
+            for (int i = 0; i < path.size(); ++i) {
+                pathString += path.get(i);
+                if (i != path.size() - 1) {
+                    pathString += "/";
+                }
+            }
+            args.putString(ARG_PATH, pathString);
+        }
+        if (childNumber != null) {
+            args.putInt(ARG_CHILD_NUMBER, childNumber);
+        }
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public AlertDialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (getArguments() != null) {
+            String path_string = getArguments().getString(ARG_PATH);
+            if (path_string != null) {
+                List<String> path = Arrays.asList(path_string.split("/"));
+                item = GlobalState.getFiles().getItem(path);
+            }
+            childNumber = getArguments().getInt(ARG_CHILD_NUMBER, -1);
+            if (childNumber == -1) {
+                childNumber = null;
+            }
+        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
@@ -60,6 +86,10 @@ public class AddTask extends DialogFragment {
         final Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
         spinner.setAdapter(adapter);
 
+        if (item != null) {
+            spinner.setVisibility(View.GONE);
+        }
+
         final EditText titleText = (EditText) view.findViewById(R.id.edit_task_name);
 
         final FinalBoolean deadlineDateSet = new FinalBoolean(false);
@@ -72,20 +102,24 @@ public class AddTask extends DialogFragment {
         Button scheduleDatePick = (Button) view.findViewById(R.id.edit_task_schedule);
         dateSetter(view, scheduleDateSet, scheduleDate, scheduleDatePick);
 
-        builder.setMessage("Add task")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        String pathString = (String) spinner.getSelectedItem();
-                        List<String> path = Arrays.asList(pathString.split("/"));
                         OrgItem parent = null;
                         Org doc;
-                        if (path.size() > 1) {
-                            parent = GlobalState.getFiles().getItem(path);
-                        }
-                        if (parent != null) {
-                            doc = parent.document;
+                        if (item != null) {
+                            parent = item;
+                            doc = item.document;
                         } else {
-                            doc = GlobalState.getFiles().getDocument(path.get(0));
+                            String pathString = (String) spinner.getSelectedItem();
+                            List<String> path = Arrays.asList(pathString.split("/"));
+                            if (path.size() > 1) {
+                                parent = GlobalState.getFiles().getItem(path);
+                            }
+                            if (parent != null) {
+                                doc = parent.document;
+                            } else {
+                                doc = GlobalState.getFiles().getDocument(path.get(0));
+                            }
                         }
                         OrgItem orgItem = new OrgItem(doc.keyword, null, parent, 0, doc);
                         orgItem.title = titleText.getText().toString();
@@ -103,7 +137,7 @@ public class AddTask extends DialogFragment {
                         orgItem.keyword = orgItem.keywords
                                 .keywordToInt(orgItem.keywords.todoKeywords.get(0));
 
-                        doc.addItem(parent, orgItem);
+                        doc.addItem(parent, orgItem, childNumber);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity
 
     private ArrayList<OrgItem> scheduledToday;
     private ArrayList<OrgItem> deadlineSoon;
+    private ArrayList<OrgItem> todos;
 
     private ArrayList<Pair<OrgItem, Pair<View, ViewGroup>>> views;
 
@@ -125,19 +127,23 @@ public class MainActivity extends AppCompatActivity
 
         final LinearLayout scheduledContainer = (LinearLayout) findViewById(R.id.scheduledtoday);
         final LinearLayout deadlineContainer = (LinearLayout) findViewById(R.id.deadlinesoon);
+        final LinearLayout todoContainer = (LinearLayout) findViewById(R.id.alltodos);
         scheduledContainer.removeViewsInLayout(1, scheduledContainer.getChildCount()-1);
         scheduledToday = new ArrayList<>();
         deadlineContainer.removeViewsInLayout(1, deadlineContainer.getChildCount()-1);
         deadlineSoon = new ArrayList<>();
+        todoContainer.removeViewsInLayout(1, todoContainer.getChildCount()-1);
+        todos = new ArrayList<>();
 
         for (int j=0; j<files.getFiles().size(); ++j) {
             Org org = files.getFiles().get(j);
             for (int i = 0; i < org.items.size(); ++i) {
+                boolean added = false;
                 OrgItem item = org.items.get(i);
-                if (item.deadline != null &&
-                        item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE) {
-                    if (DateFormatter.days(item.deadline) < 10) {
+                if (item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE) {
+                    if (item.deadline != null && DateFormatter.days(item.deadline) < 10) {
                         deadlineSoon.add(item);
+                        added = true;
                     }
                 }
                 if (item.scheduled != null) {
@@ -149,10 +155,18 @@ public class MainActivity extends AppCompatActivity
                                     && item.keywords.keywordType(item.keyword) == Org.Keyword.DONE_KEYWORD_TYPE
                                     && DateFormatter.days(item.closed) == 0))) {
                         scheduledToday.add(item);
+                        added = true;
+                    }
+                }
+                if (!added && item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE) {
+                    if (item.deadline != null || item.scheduled != null) {
+                        todos.add(item);
                     }
                 }
             }
         }
+
+        views = new ArrayList<>();
 
         class ScheduledComparator implements Comparator<OrgItem> {
             @Override
@@ -160,28 +174,7 @@ public class MainActivity extends AppCompatActivity
                 return o1.scheduled.compareTo(o2.scheduled);
             }
         }
-        Collections.sort(scheduledToday, new ScheduledComparator());
-
-        views = new ArrayList<>();
-        for (int i=0; i<scheduledToday.size(); ++i) {
-            final OrgItem item = scheduledToday.get(i);
-            final View itemView = ItemView.getView(item, null,
-                    scheduledContainer, false, false, false);
-            views.add(new Pair<>(item, new Pair<>(itemView, (ViewGroup) scheduledContainer)));
-            scheduledContainer.addView(itemView);
-
-            itemView.setOnTouchListener(new OnSwipeTouchListener(itemView.getContext()) {
-                public void onSwipeRight() {
-                    item.nextKeyword();
-                    item.expandState = 0;
-                    ItemView.getView(item, itemView, scheduledContainer, false, false, false);
-                }
-
-                public void onTap() {
-                    launchDocumentActivity(itemView, item);
-                }
-            });
-        }
+        populateItems(new ScheduledComparator(), scheduledContainer, scheduledToday);
 
         class DeadlineComparator implements Comparator<OrgItem> {
             @Override
@@ -189,18 +182,50 @@ public class MainActivity extends AppCompatActivity
                 return o1.deadline.compareTo(o2.deadline);
             }
         }
-        Collections.sort(deadlineSoon, new DeadlineComparator());
-        for (int i=0; i<deadlineSoon.size(); ++i) {
-            final OrgItem item = deadlineSoon.get(i);
+        populateItems(new DeadlineComparator(), deadlineContainer, deadlineSoon);
+
+        class TodoComparator implements Comparator<OrgItem> {
+            @Override
+            public int compare(OrgItem o1, OrgItem o2) {
+                Date o1Date = o1.scheduled;
+                Date o2Date = o2.scheduled;
+                if (o1Date == null ||
+                        (o1.deadline != null && o1.deadline.before(o1Date))) {
+                    o1Date = o1.deadline;
+                }
+                if (o2Date == null ||
+                        (o2.deadline != null && o2.deadline.before(o2Date))) {
+                    o2Date = o2.deadline;
+                }
+                if (o1Date != null && o2Date != null) {
+                    return o1Date.compareTo(o2Date);
+                } else {
+                    if (o1Date != null) {
+                        return -1;
+                    } else if (o2Date != null){
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                }
+            }
+        }
+        populateItems(new TodoComparator(), todoContainer, todos);
+    }
+
+    public void populateItems(Comparator<OrgItem> comparator, final LinearLayout container, ArrayList<OrgItem> items) {
+        Collections.sort(items, comparator);
+        for (int i=0; i<items.size(); ++i) {
+            final OrgItem item = items.get(i);
             final View itemView = ItemView.getView(item, null,
-                    deadlineContainer, false, false, false);
-            views.add(new Pair<>(item, new Pair<>(itemView, (ViewGroup) deadlineContainer)));
-            deadlineContainer.addView(itemView);
+                    container, false, false, false);
+            views.add(new Pair<>(item, new Pair<>(itemView, (ViewGroup) container)));
+            container.addView(itemView);
             itemView.setOnTouchListener(new OnSwipeTouchListener(itemView.getContext()) {
                 public void onSwipeRight() {
                     item.nextKeyword();
                     item.expandState = 0;
-                    ItemView.getView(item, itemView, deadlineContainer, false, false, false);
+                    ItemView.getView(item, itemView, container, false, false, false);
                 }
 
                 public void onTap() {
@@ -209,8 +234,7 @@ public class MainActivity extends AppCompatActivity
             });
         }
 
-        scheduledContainer.requestLayout();
-        deadlineContainer.requestLayout();
+        container.requestLayout();
     }
 
     public void syncFilesCallback(final OrgFiles files) {

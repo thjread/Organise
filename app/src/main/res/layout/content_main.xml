@@ -73,6 +73,31 @@
                 </LinearLayout>
             </android.support.v7.widget.CardView>
 
+            <Space
+                android:layout_width="1dp"
+                android:layout_height="16dp" />
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="2dp"
+                android:background="@color/card_background">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:id="@+id/alltodos"
+                    android:divider="?android:listDivider"
+                    android:showDividers="middle">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="Todo"
+                        android:gravity="center_vertical"
+                        android:textSize="16sp"
+                        android:paddingLeft="8dp"/>
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
         </LinearLayout>
     </ScrollView>
 </android.support.v4.widget.SwipeRefreshLayout>

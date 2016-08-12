@@ -96,8 +96,7 @@ public class MainActivity extends AppCompatActivity
             Log.d("thjread.organise", e.toString());
         }
 
-        Dropbox.init(this, swipeRefresh, this);
-        is_syncing = true;
+        Dropbox.init(this);
     }
 
     public void onRefresh() {
@@ -302,7 +301,7 @@ public class MainActivity extends AppCompatActivity
     public void onResume() {
         super.onResume();
 
-        Dropbox.resumeAuth(this);
+        Dropbox.resumeAuth();
 
         refreshViews();
     }

@@ -19,7 +19,7 @@ public class Dropbox {
     static private DropboxAPI<AndroidAuthSession> mDBApi;
     static private Context context;
 
-    public static void init(Context c, final SwipeRefreshLayout swipeRefresh, final SyncFilesCallback callback) {
+    public static void init(Context c) {
         context = c;
 
         APP_KEY = context.getResources().getString(R.string.dropbox_app_key);
@@ -32,25 +32,17 @@ public class Dropbox {
         String token = PrefUtils.readPref(context, dropbox_token_pref, null);
         if (token != null) {
             mDBApi.getSession().setOAuth2AccessToken(token);
-            swipeRefresh.post(new Runnable() {
-                @Override
-                public void run() {
-                    swipeRefresh.setRefreshing(true);
-                    syncFiles(callback);
-                }
-            });
         } else {
             mDBApi.getSession().startOAuth2Authentication(context);
         }
     }
 
-    public static void resumeAuth(SyncFilesCallback callback) {
+    public static void resumeAuth() {
         if (mDBApi.getSession().authenticationSuccessful()) {
             try {
                 mDBApi.getSession().finishAuthentication();
                 String token = mDBApi.getSession().getOAuth2AccessToken();
                 PrefUtils.writePref(context, dropbox_token_pref, token);
-                syncFiles(callback);
             } catch (IllegalStateException e) {
                 Log.i("DbAuthLog", "Error authenticating", e);
             }

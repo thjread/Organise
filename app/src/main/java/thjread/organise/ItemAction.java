@@ -81,6 +81,14 @@ public class ItemAction extends DialogFragment {
             }
         });
 
+        final Button editItemButton = (Button) v.findViewById(R.id.task_action_edit_task);
+        editItemButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editItem();
+            }
+        });
+
         final Button deleteButton = (Button) v.findViewById(R.id.task_action_delete);
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,7 +101,7 @@ public class ItemAction extends DialogFragment {
     }
 
     public void addChild() {
-        Fragment f = AddTask.newInstance(item, null);
+        Fragment f = AddTask.newInstance(item, null, null);
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.remove(this);
         ft.add(f, null);
@@ -101,7 +109,15 @@ public class ItemAction extends DialogFragment {
     }
 
     public void addSibling() {
-        Fragment f = AddTask.newInstance(item.parent, item.child_number+1);
+        Fragment f = AddTask.newInstance(item.parent, item.child_number+1, null);
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.remove(this);
+        ft.add(f, null);
+        ft.commit();
+    }
+
+    public void editItem() {
+        Fragment f = AddTask.newInstance(item, null, true);
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.remove(this);
         ft.add(f, null);

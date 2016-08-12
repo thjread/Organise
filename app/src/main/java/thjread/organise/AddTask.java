@@ -32,10 +32,12 @@ public class AddTask extends AppCompatDialogFragment {
 
     private static final String ARG_PATH = "path";
     private static final String ARG_CHILD_NUMBER = "child_number";
+    private static final String ARG_IS_EDIT = "is_edit";
     private OrgItem item;
     private Integer childNumber;
+    private boolean isEdit;
 
-    public static AddTask newInstance(OrgItem item, Integer childNumber) {
+    public static AddTask newInstance(OrgItem item, Integer childNumber, Boolean isEdit) {
         AddTask fragment = new AddTask();
         Bundle args = new Bundle();
         if (item != null) {
@@ -51,6 +53,9 @@ public class AddTask extends AppCompatDialogFragment {
         }
         if (childNumber != null) {
             args.putInt(ARG_CHILD_NUMBER, childNumber);
+        }
+        if (isEdit != null) {
+            args.putBoolean(ARG_IS_EDIT, isEdit);
         }
         fragment.setArguments(args);
         return fragment;
@@ -70,6 +75,7 @@ public class AddTask extends AppCompatDialogFragment {
             if (childNumber == -1) {
                 childNumber = null;
             }
+            isEdit = getArguments().getBoolean(ARG_IS_EDIT, false);
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -95,49 +101,79 @@ public class AddTask extends AppCompatDialogFragment {
         final FinalBoolean deadlineDateSet = new FinalBoolean(false);
         final Calendar deadlineDate = Calendar.getInstance();
         Button deadlineDatePick = (Button) view.findViewById(R.id.edit_task_deadline);
-        dateSetter(view, deadlineDateSet, deadlineDate, deadlineDatePick);
 
         final FinalBoolean scheduleDateSet = new FinalBoolean(false);
         final Calendar scheduleDate = Calendar.getInstance();
         Button scheduleDatePick = (Button) view.findViewById(R.id.edit_task_schedule);
+
+        if (isEdit) {
+            titleText.setText(item.title);
+            if (item.deadline != null) {
+                deadlineDate.setTime(item.deadline);
+                deadlineDateSet.value = true;
+                deadlineDatePick.setText(DateFormatter.format(item.deadline, false));
+            }
+            if (item.scheduled != null) {
+                scheduleDate.setTime(item.scheduled);
+                scheduleDateSet.value = true;
+                scheduleDatePick.setText(DateFormatter.format(item.scheduled, false));
+            }
+        }
+
+        dateSetter(view, deadlineDateSet, deadlineDate, deadlineDatePick);
         dateSetter(view, scheduleDateSet, scheduleDate, scheduleDatePick);
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        OrgItem parent = null;
-                        Org doc;
-                        if (item != null) {
-                            parent = item;
-                            doc = item.document;
+                        if (isEdit) {
+                            item.title = titleText.getText().toString();
+                            if (deadlineDateSet.value == true) {
+                                item.deadline = deadlineDate.getTime();
+                            } else {
+                                item.deadline = null;
+                            }
+                            if (scheduleDateSet.value == true) {
+                                item.scheduled = scheduleDate.getTime();
+                            } else {
+                                item.scheduled = null;
+                            }
+                            item.document.file.write(item.document);
                         } else {
-                            String pathString = (String) spinner.getSelectedItem();
-                            List<String> path = Arrays.asList(pathString.split("/"));
-                            if (path.size() > 1) {
-                                parent = GlobalState.getFiles().getItem(path);
+                            OrgItem parent = null;
+                            Org doc;
+                            if (item != null) {
+                                parent = item;
+                                doc = item.document;
+                            } else {
+                                String pathString = (String) spinner.getSelectedItem();
+                                List<String> path = Arrays.asList(pathString.split("/"));
+                                if (path.size() > 1) {
+                                    parent = GlobalState.getFiles().getItem(path);
+                                }
+                                if (parent != null) {
+                                    doc = parent.document;
+                                } else {
+                                    doc = GlobalState.getFiles().getDocument(path.get(0));
+                                }
+                            }
+                            OrgItem orgItem = new OrgItem(doc.keyword, null, parent, 0, doc);
+                            orgItem.title = titleText.getText().toString();
+                            if (deadlineDateSet.value == true) {
+                                orgItem.deadline = deadlineDate.getTime();
+                            }
+                            if (scheduleDateSet.value == true) {
+                                orgItem.scheduled = scheduleDate.getTime();
                             }
                             if (parent != null) {
-                                doc = parent.document;
+                                orgItem.treeLevel = parent.treeLevel + 1;
                             } else {
-                                doc = GlobalState.getFiles().getDocument(path.get(0));
+                                orgItem.treeLevel = 1;
                             }
-                        }
-                        OrgItem orgItem = new OrgItem(doc.keyword, null, parent, 0, doc);
-                        orgItem.title = titleText.getText().toString();
-                        if (deadlineDateSet.value == true) {
-                            orgItem.deadline = deadlineDate.getTime();
-                        }
-                        if (scheduleDateSet.value == true) {
-                            orgItem.scheduled = scheduleDate.getTime();
-                        }
-                        if (parent != null) {
-                            orgItem.treeLevel = parent.treeLevel + 1;
-                        } else {
-                            orgItem.treeLevel = 1;
-                        }
-                        orgItem.keyword = orgItem.keywords
-                                .keywordToInt(orgItem.keywords.todoKeywords.get(0));
+                            orgItem.keyword = orgItem.keywords
+                                    .keywordToInt(orgItem.keywords.todoKeywords.get(0));
 
-                        doc.addItem(parent, orgItem, childNumber);
+                            doc.addItem(parent, orgItem, childNumber);
+                        }
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

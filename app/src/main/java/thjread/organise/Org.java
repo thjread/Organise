@@ -181,8 +181,8 @@ public class Org {
     public void deleteItem(OrgItem item) {
         OrgItem parent = item.parent;
         parent.children.remove(item);
-        for (int i=item.child_number+1; i<parent.children.size(); ++i) {
-            parent.children.get(i).child_number -= 1;
+        for (int i=item.child_number; i<parent.children.size(); ++i) {
+            parent.children.get(i).child_number = i;
         }
         this.file.write(this);
     }

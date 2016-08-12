@@ -125,10 +125,13 @@ public class ItemAction extends DialogFragment {
     }
 
     public void deleteItem() {
-        item.document.deleteItem(item);
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.remove(this);
-        ft.commit();
+        if (item != null) {
+            item.document.deleteItem(item);
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.remove(this);
+            ft.commit();
+            ((AddTaskCallbackInterface) getActivity()).onItemChange(item, false, true);
+        }
     }
 
     @Override

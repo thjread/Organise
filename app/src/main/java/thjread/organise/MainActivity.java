@@ -34,7 +34,8 @@ import java.util.Comparator;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
             SyncFilesCallback,
-            SwipeRefreshLayout.OnRefreshListener {
+            SwipeRefreshLayout.OnRefreshListener,
+            AddTaskCallbackInterface {
 
     private ArrayList<OrgItem> scheduledToday;
     private ArrayList<OrgItem> deadlineSoon;
@@ -233,6 +234,10 @@ public class MainActivity extends AppCompatActivity
             item.expandState = 0;
             ItemView.getView(item, itemView, container, false, false, false);
         }
+    }
+
+    public void onItemChange(OrgItem item, boolean isEdit, boolean isDelete) {
+        refreshViews();
     }
 
     private void launchDocumentActivity(View v, OrgItem item) {

@@ -15,7 +15,7 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
-public class DocumentActivity extends AppCompatActivity {
+public class DocumentActivity extends AppCompatActivity implements AddTaskCallbackInterface {
     private ArrayList<OrgItem> listItems;
     private ItemAdapter adapter;
     private ListView listView;
@@ -86,6 +86,41 @@ public class DocumentActivity extends AppCompatActivity {
                 });
             }
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    public void onItemChange(OrgItem item, boolean isEdit, boolean deleted) {
+        if (deleted) {
+            listItems.remove(item);
+            adapter.notifyDataSetChanged();
+            return;
+        }
+
+        if (!isEdit) {
+            int index;
+            if (item.child_number == 0) {
+                index = listItems.indexOf(item.parent)+1;
+            } else {
+                if (item.child_number < item.parent.children.size()-1) {
+                    index = listItems.indexOf(item.parent.children.get(item.child_number+1));
+                } else {
+                    index = listItems.indexOf(item.parent.children.get(item.child_number-1));
+                    while(index < listItems.size() && listItems.get(index).treeLevel >= item.treeLevel) {
+                        index++;
+                    }
+                }
+            }
+            if (item.parent.getExpanded() == 0) {
+                item.parent.expandState = 1;
+            }
+            listItems.add(index, item);
+        }
+
+        adapter.notifyDataSetChanged();
     }
 
     private void launchItemActionFragment(OrgItem item) {

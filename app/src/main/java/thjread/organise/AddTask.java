@@ -36,6 +36,7 @@ public class AddTask extends AppCompatDialogFragment {
     private OrgItem item;
     private Integer childNumber;
     private boolean isEdit;
+    private OrgItem changedItem = null;
 
     public static AddTask newInstance(OrgItem item, Integer childNumber, Boolean isEdit) {
         AddTask fragment = new AddTask();
@@ -156,23 +157,23 @@ public class AddTask extends AppCompatDialogFragment {
                                     doc = GlobalState.getFiles().getDocument(path.get(0));
                                 }
                             }
-                            OrgItem orgItem = new OrgItem(doc.keyword, null, parent, 0, doc);
-                            orgItem.title = titleText.getText().toString();
+                            changedItem = new OrgItem(doc.keyword, null, parent, 0, doc);
+                            changedItem.title = titleText.getText().toString();
                             if (deadlineDateSet.value == true) {
-                                orgItem.deadline = deadlineDate.getTime();
+                                changedItem.deadline = deadlineDate.getTime();
                             }
                             if (scheduleDateSet.value == true) {
-                                orgItem.scheduled = scheduleDate.getTime();
+                                changedItem.scheduled = scheduleDate.getTime();
                             }
                             if (parent != null) {
-                                orgItem.treeLevel = parent.treeLevel + 1;
+                                changedItem.treeLevel = parent.treeLevel + 1;
                             } else {
-                                orgItem.treeLevel = 1;
+                                changedItem.treeLevel = 1;
                             }
-                            orgItem.keyword = orgItem.keywords
-                                    .keywordToInt(orgItem.keywords.todoKeywords.get(0));
+                            changedItem.keyword = changedItem.keywords
+                                    .keywordToInt(changedItem.keywords.todoKeywords.get(0));
 
-                            doc.addItem(parent, orgItem, childNumber);
+                            doc.addItem(parent, changedItem, childNumber);
                         }
                     }
                 })
@@ -221,5 +222,8 @@ public class AddTask extends AppCompatDialogFragment {
     @Override
     public void onDetach() {
         super.onDetach();
+        if (changedItem != null) {
+            ((AddTaskCallbackInterface) getActivity()).onItemChange(changedItem, isEdit, false);
+        }
     }
 }

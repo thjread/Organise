@@ -1,6 +1,7 @@
 package thjread.organise;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -20,11 +21,17 @@ public class OrgFile {
     String title;
     Date lastWrite = null;
 
+    File write_file;
+
+    final static String header = "#written by Organise android app";
+
     public OrgFile(String filePath, Context context) throws IOException {
         file = new ArrayList<>();
 
         File doc_dir = context.getDir("doc_dir", Context.MODE_PRIVATE);
+        File write_dir = context.getDir("write_dir", Context.MODE_PRIVATE);
         f = new File(doc_dir, filePath);
+        write_file = new File(write_dir, filePath);
         BufferedReader reader = new BufferedReader(new FileReader(f));
         String str = "";
         while ((str = reader.readLine()) != null) {
@@ -33,9 +40,13 @@ public class OrgFile {
         reader.close();
 
         this.title = filePath;
+
+        if (write_file.exists()) {
+            lastWrite = new Date(f.lastModified());
+        }
     }
 
-    public OrgFile(File f) throws IOException {
+    public OrgFile(File f, Context context) throws IOException {
         this.f = f;
         file = new ArrayList<>();
 
@@ -47,19 +58,44 @@ public class OrgFile {
         reader.close();
 
         this.title = f.getName();
+
+        File write_dir = context.getDir("write_dir", Context.MODE_PRIVATE);
+        write_file = new File(write_dir, title);
+        if (write_file.exists()) {
+            lastWrite = new Date(f.lastModified());
+        }
     }
 
     public void write(Org org) {
-        String s = org.serialise();
-        try {
-            String path = f.getAbsolutePath();
-            f.delete();
-            FileOutputStream fo = new FileOutputStream(path, true);
-            fo.write(s.getBytes());
-            fo.close();
-            lastWrite = new Date();
-        } catch (IOException e) {
-            Log.d("thjread.organise", e.toString());
+        OrgWriteTask task = new OrgWriteTask(org);
+        task.execute();
+    }
+
+    class OrgWriteTask extends AsyncTask<Void, Void, Void> {
+        Org org;
+
+        OrgWriteTask(Org org) {
+            this.org = org;
+        }
+
+        protected Void doInBackground(Void... params) {
+            GlobalState.getWriteLock();
+            try {
+                String s = org.serialise();
+                String path = f.getAbsolutePath();
+                f.delete();
+                FileOutputStream fo = new FileOutputStream(path, true);
+                fo.write(s.getBytes());
+                fo.close();
+                lastWrite = new Date();
+
+                write_file.getParentFile().mkdirs();
+                write_file.createNewFile();
+            } catch (Exception e) {
+                Log.e("thjread.organise", e.toString());
+            }
+            GlobalState.returnWriteLock();
+            return null;
         }
     }
 

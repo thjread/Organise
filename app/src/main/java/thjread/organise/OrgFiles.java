@@ -9,11 +9,13 @@ import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.session.AppKeyPair;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,7 +64,7 @@ public class OrgFiles {
         File doc_dir = context.getDir("doc_dir", Context.MODE_PRIVATE);
         File[] files = doc_dir.listFiles();
         for (int i=0; i<files.length; ++i) {
-            Org document = new Org(new OrgFile(files[i]));
+            Org document = new Org(new OrgFile(files[i], context));
             addDocument(document);
             fileMap.put(document.title, document);
         }
@@ -91,10 +93,13 @@ public class OrgFiles {
         }
 
         protected Void doInBackground(Void... params) {
+            GlobalState.getWriteLock();
             try {
                 DropboxAPI.Entry meta = mDBApi.metadata("/org", 100, null, true, null);
 
                 SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z");//TODO is this right?
+
+                HashMap<String, Boolean> synced = new HashMap<>();
 
                 for (int i=0; i<meta.contents.size(); ++i) {
                     String path = meta.contents.get(i).path;
@@ -142,14 +147,37 @@ public class OrgFiles {
                         FileOutputStream outputStream = new FileOutputStream(file);
                         mDBApi.getFile(path, null, outputStream, null);
                         outputStream.close();
-                        addDocument(new Org(new OrgFile(filename, context)));
+                        OrgFile orgFile = new OrgFile(filename, context);
+                        orgFile.write_file.delete();
+                        addDocument(new Org(orgFile));
+                    }
+                    synced.put(filename, true);
+                }
+
+                for (int i=0; i<files.size(); ++i) {
+                    String filename = files.get(i).title;
+                    if (!synced.containsKey(filename)) {
+                        File doc_dir = context.getDir("doc_dir", Context.MODE_PRIVATE);
+                        File file = new File(doc_dir, filename);
+                        String path = "/org/" + filename;
+                        FileInputStream inputStream = new FileInputStream(file);
+                        try {
+                            mDBApi.delete(path + ".bak");
+                        } catch (DropboxException e) {
+                            //no backups
+                        }
+                        //mDBApi.move(path, path+".bak");
+                        mDBApi.putFile(path, inputStream, file.length(), null, null);
+                        inputStream.close();
+                        Log.d("thjread.organise", "uploading new file");
                     }
                 }
-            } catch (DropboxException e) {//TODO
-                Log.d("thjread.organise", e.toString());
-            } catch (IOException e) {
 
+            } catch (Exception e) {//TODO
+                Log.d("thjread.organise", e.toString());
             }
+
+            GlobalState.returnWriteLock();
 
             if (callback != null) {
                 callback.syncFilesCallback(orgfiles);

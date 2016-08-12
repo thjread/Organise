@@ -32,6 +32,17 @@ public class GlobalState extends Application {
             throw new IllegalStateException("Application not created yet!");
     }
 
+    private static boolean writeLock = false;
+
+    public static void getWriteLock() {
+        while (writeLock == true) {}
+        writeLock = true;
+    }
+
+    public static void returnWriteLock() {
+        writeLock = false;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();

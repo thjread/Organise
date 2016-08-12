@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<Pair<OrgItem, Pair<View, ViewGroup>>> views;
 
     private SwipeRefreshLayout swipeRefresh;
+    private boolean is_syncing = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,10 +95,12 @@ public class MainActivity extends AppCompatActivity
         }
 
         Dropbox.init(this, swipeRefresh, this);
+        is_syncing = true;
     }
 
     public void onRefresh() {
         Dropbox.syncFiles(this);
+        is_syncing = true;
     }
 
     public void populateViews(OrgFiles files) {
@@ -217,6 +220,7 @@ public class MainActivity extends AppCompatActivity
                 Log.d("thjread.organise", "Dropbox synced");
                 populateViews(files);
                 swipeRefresh.setRefreshing(false);
+                is_syncing = false;
             }
         });
     }
@@ -241,6 +245,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void launchDocumentActivity(View v, OrgItem item) {
+        if (is_syncing) {
+            return;
+        }
         GlobalState.setCurrentOrg(item.document);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
                 && v != null) {
@@ -260,6 +267,11 @@ public class MainActivity extends AppCompatActivity
         b.putInt("id", item.id);
         i.putExtras(b);
         ActivityCompat.startActivity(this, i, b);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        }
     }
 
     @Override

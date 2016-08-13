@@ -20,7 +20,7 @@ import java.util.Calendar;
 import java.util.List;
 
 public class AddTask extends AppCompatDialogFragment {
-    private ArrayList<String> locations;
+    private List<String> locations;
 
     class FinalBoolean {
         public boolean value;
@@ -85,10 +85,7 @@ public class AddTask extends AppCompatDialogFragment {
         view.setPadding(19, 5, 14, 5); //Magic padding values
         builder.setView(view);
 
-        locations = new ArrayList<>();
-        locations.add("Todo.org/Tasks");
-        locations.add("Todo.org/Problems");
-        locations.add("Homework.org");
+        locations = GlobalState.getLocations();
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_spinner_dropdown_item, locations);
         final Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
         spinner.setAdapter(adapter);

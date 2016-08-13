@@ -132,6 +132,7 @@ public class ItemAction extends DialogFragment {
             final AddTaskCallbackInterface callback = (AddTaskCallbackInterface) getActivity();
             AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AppCompatAlertDialogStyle)
                     .setTitle("Confirm delete")
+                    .setMessage("Delete \"" + item.title + "\"")
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             callback.onItemChange(item, false, true);

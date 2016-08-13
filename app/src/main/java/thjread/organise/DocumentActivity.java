@@ -119,6 +119,7 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
     public void deleteDocument() {
         AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle)
                 .setTitle("Confirm delete document")
+                .setMessage("Delete \"" + org.title + "\"")
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         org.file.delete(org);

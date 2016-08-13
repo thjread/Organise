@@ -164,6 +164,7 @@ public class Org {
                 rootItems.add(childNumber, item);
             }
         } else {
+            item.parent = parent;
             if (childNumber == null || childNumber == parent.children.size()) {
                 item.child_number = parent.children.size();
                 parent.addChild(item);

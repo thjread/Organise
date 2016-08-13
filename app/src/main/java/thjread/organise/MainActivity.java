@@ -97,6 +97,8 @@ public class MainActivity extends AppCompatActivity
         }
 
         Dropbox.init(this);
+
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
     }
 
     public void onRefresh() {
@@ -338,6 +340,8 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent i = new Intent(this, SettingsActivity.class);
+            ActivityCompat.startActivity(this, i, null);
             return true;
         }
 

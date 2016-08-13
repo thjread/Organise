@@ -1,0 +1,30 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <PreferenceCategory
+        android:title="App settings"
+        android:key="app_settings">
+        <EditTextPreference
+            android:title="Quick add task locations"
+            android:summary="Comma separated list of locations you can quickly add tasks to"
+            android:defaultValue="Todo.org/Tasks, Homework.org"
+            android:inputType="textUri"
+            android:key="quick_add_locations"
+            android:selectAllOnFocus="false"
+            android:singleLine="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Dropbox sync"
+        android:key="dropbox_sync">
+        <EditTextPreference
+            android:defaultValue="/org"
+            android:inputType="textUri"
+            android:key="dropbox_path"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:title="Dropbox sync folder" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

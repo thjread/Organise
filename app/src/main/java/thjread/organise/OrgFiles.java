@@ -94,7 +94,7 @@ public class OrgFiles {
         protected Void doInBackground(Void... params) {
             GlobalState.getWriteLock();
             try {
-                DropboxAPI.Entry meta = mDBApi.metadata("/org", 100, null, true, null);
+                DropboxAPI.Entry meta = mDBApi.metadata(GlobalState.getDropboxPath(), 100, null, true, null);
 
                 SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z");//TODO is this right?
 
@@ -173,7 +173,7 @@ public class OrgFiles {
                         } else {
                             File doc_dir = context.getDir("doc_dir", Context.MODE_PRIVATE);
                             File file = new File(doc_dir, filename);
-                            String path = "/org/" + filename;
+                            String path = GlobalState.getDropboxPath() + "/" + filename;
                             FileInputStream inputStream = new FileInputStream(file);
                             try {
                                 mDBApi.delete(path + ".bak");

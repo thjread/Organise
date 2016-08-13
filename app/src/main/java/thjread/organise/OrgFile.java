@@ -23,6 +23,8 @@ public class OrgFile {
 
     File write_file;
 
+    public boolean deleted = false;
+
     final static String header = "#written by Organise android app";
 
     public OrgFile(String filePath, Context context) throws IOException {
@@ -71,6 +73,12 @@ public class OrgFile {
         task.execute();
     }
 
+    public void delete(Org org) {
+        OrgDeleteTask task = new OrgDeleteTask(org);
+        task.execute();
+        this.deleted = true;
+    }
+
     class OrgWriteTask extends AsyncTask<Void, Void, Void> {
         Org org;
 
@@ -88,7 +96,29 @@ public class OrgFile {
                 fo.write(s.getBytes());
                 fo.close();
                 lastWrite = new Date();
+                write_file.getParentFile().mkdirs();
+                write_file.createNewFile();
+            } catch (Exception e) {
+                Log.e("thjread.organise", e.toString());
+            }
+            GlobalState.returnWriteLock();
+            return null;
+        }
+    }
 
+    class OrgDeleteTask extends AsyncTask<Void, Void, Void> {
+        Org org;
+
+        OrgDeleteTask(Org org) {
+            this.org = org;
+        }
+
+        protected Void doInBackground(Void... params) {
+            GlobalState.getWriteLock();
+            try {
+                String path = f.getAbsolutePath();
+                f.delete();
+                lastWrite = new Date();
                 write_file.getParentFile().mkdirs();
                 write_file.createNewFile();
             } catch (Exception e) {

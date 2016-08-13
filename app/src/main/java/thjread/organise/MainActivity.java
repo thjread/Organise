@@ -110,18 +110,22 @@ public class MainActivity extends AppCompatActivity
         menu.clear();
         for (int i=0; i<files.getFiles().size(); ++i) {
             final Org doc = files.getFiles().get(i);
-            menu.add(doc.title).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    GlobalState.setCurrentOrg(doc);
-                    if (doc.rootItems.size() > 1) {
-                        launchDocumentActivity(null, doc.rootItems.get(1));//Avoid colour snap
-                    } else {
-                        launchDocumentActivity(null, doc.rootItems.get(0));
+            if (!doc.file.deleted) {
+                menu.add(doc.title).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        GlobalState.setCurrentOrg(doc);
+                        if (doc.rootItems.size() > 1) {
+                            launchDocumentActivity(null, doc.rootItems.get(1));//Avoid colour snap
+                        } else {
+                            launchDocumentActivity(null, doc.rootItems.get(0));
+                        }
+                        return true;
                     }
-                    return true;
-                };
-            });
+
+                    ;
+                });
+            }
         }
 
         final LinearLayout scheduledContainer = (LinearLayout) findViewById(R.id.scheduledtoday);
@@ -136,6 +140,8 @@ public class MainActivity extends AppCompatActivity
 
         for (int j=0; j<files.getFiles().size(); ++j) {
             Org org = files.getFiles().get(j);
+            if (org.file.deleted) continue;
+
             for (int i = 0; i < org.items.size(); ++i) {
                 boolean added = false;
                 OrgItem item = org.items.get(i);
@@ -303,7 +309,7 @@ public class MainActivity extends AppCompatActivity
 
         Dropbox.resumeAuth();
 
-        refreshViews();
+        populateViews(GlobalState.getFiles());
     }
 
     @Override

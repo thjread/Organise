@@ -180,9 +180,16 @@ public class Org {
 
     public void deleteItem(OrgItem item) {
         OrgItem parent = item.parent;
-        parent.children.remove(item);
-        for (int i=item.child_number; i<parent.children.size(); ++i) {
-            parent.children.get(i).child_number = i;
+        ArrayList<OrgItem> children;
+        if (parent == null) {
+            children = item.document.rootItems;
+        } else {
+            children = parent.children;
+        }
+
+        children.remove(item);
+        for (int i=item.child_number; i<children.size(); ++i) {
+            children.get(i).child_number = i;
         }
         this.file.write(this);
     }

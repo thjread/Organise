@@ -1,11 +1,14 @@
 package thjread.organise;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -126,11 +129,22 @@ public class ItemAction extends DialogFragment {
 
     public void deleteItem() {
         if (item != null) {
-            item.document.deleteItem(item);
+            final AddTaskCallbackInterface callback = (AddTaskCallbackInterface) getActivity();
+            AlertDialog dialog = new AlertDialog.Builder(getContext(), R.style.AppCompatAlertDialogStyle)
+                    .setTitle("Confirm delete")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            callback.onItemChange(item, false, true);
+                            item.document.deleteItem(item);
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .create();
+
+            dialog.show();
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.remove(this);
             ft.commit();
-            ((AddTaskCallbackInterface) getActivity()).onItemChange(item, false, true);
         }
     }
 

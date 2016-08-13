@@ -34,7 +34,6 @@ public class OrgFiles {
         fileMap = new HashMap<>();
     }
 
-
     public void addDocument(Org document) {
         if (fileMap.containsKey(document.title)) {
             int index = files.indexOf(fileMap.get(document.title));
@@ -112,13 +111,14 @@ public class OrgFiles {
                     File file = new File(doc_dir, filename);
 
                     boolean upload = false;
+                    Org doc = null;
 
                     if (fileMap.containsKey(filename)) {
                         try {
                             String modified_string = meta.contents.get(i).modified;
                             Date dropbox_modified = format.parse(modified_string);
 
-                            Org doc = fileMap.get(filename);
+                            doc = fileMap.get(filename);
                             Date local_modified = doc.file.lastWrite;
                             if (local_modified != null && local_modified.after(dropbox_modified)) {
                                 upload = true;
@@ -134,15 +134,25 @@ public class OrgFiles {
                     }
 
                     if (upload) {
-                        FileInputStream inputStream = new FileInputStream(file);
-                        try {
-                            mDBApi.delete(path + ".bak");
-                        } catch (DropboxException e) {
-                            //no backups
+                        if (doc.file.deleted) {
+                            try {
+                                mDBApi.delete(path);
+                            } catch (DropboxException e) {
+                                Log.d("thjread.organise", e.toString());
+                            }
+                            files.remove(doc);
+                            fileMap.remove(doc.title);
+                        } else {
+                            FileInputStream inputStream = new FileInputStream(file);
+                            try {
+                                mDBApi.delete(path + ".bak");
+                            } catch (DropboxException e) {
+                                //no backups
+                            }
+                            mDBApi.move(path, path + ".bak");
+                            mDBApi.putFile(path, inputStream, file.length(), null, null);
+                            inputStream.close();
                         }
-                        mDBApi.move(path, path+".bak");
-                        mDBApi.putFile(path, inputStream, file.length(), null, null);
-                        inputStream.close();
                     } else {
                         FileOutputStream outputStream = new FileOutputStream(file);
                         mDBApi.getFile(path, null, outputStream, null);
@@ -157,19 +167,24 @@ public class OrgFiles {
                 for (int i=0; i<files.size(); ++i) {
                     String filename = files.get(i).title;
                     if (!synced.containsKey(filename)) {
-                        File doc_dir = context.getDir("doc_dir", Context.MODE_PRIVATE);
-                        File file = new File(doc_dir, filename);
-                        String path = "/org/" + filename;
-                        FileInputStream inputStream = new FileInputStream(file);
-                        try {
-                            mDBApi.delete(path + ".bak");
-                        } catch (DropboxException e) {
-                            //no backups
+                        if (files.get(i).file.deleted) {
+                            files.remove(i);
+                            fileMap.remove(filename);
+                        } else {
+                            File doc_dir = context.getDir("doc_dir", Context.MODE_PRIVATE);
+                            File file = new File(doc_dir, filename);
+                            String path = "/org/" + filename;
+                            FileInputStream inputStream = new FileInputStream(file);
+                            try {
+                                mDBApi.delete(path + ".bak");
+                            } catch (DropboxException e) {
+                                //no backups
+                            }
+                            //mDBApi.move(path, path+".bak");
+                            mDBApi.putFile(path, inputStream, file.length(), null, null);
+                            inputStream.close();
+                            Log.d("thjread.organise", "uploading new file");
                         }
-                        //mDBApi.move(path, path+".bak");
-                        mDBApi.putFile(path, inputStream, file.length(), null, null);
-                        inputStream.close();
-                        Log.d("thjread.organise", "uploading new file");
                     }
                 }
 

@@ -11,14 +11,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:theme="@style/AppTheme"
-    android:background="@color/background">
+    android:background="@color/background"
+    android:id="@+id/document_linear_layout">
     <ListView
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:id="@+id/listview"
         android:padding="8dp"
         android:clipToPadding="false"
         android:divider="@null"/>
-        <!--android:divider="@color/background"
-        android:dividerHeight="1dp"/>-->
 </LinearLayout>

@@ -35,11 +35,11 @@ public class AddTask extends AppCompatDialogFragment {
     private static final String ARG_CHILD_NUMBER = "child_number";
     private static final String ARG_IS_EDIT = "is_edit";
     private static final String ARG_SHOW_SPINNER = "show_spinner";
-    private OrgItem item;
-    private Org document;
-    private Integer childNumber;
-    private boolean isEdit;
-    private boolean showSpinner;
+    private OrgItem item = null;
+    private Org document = null;
+    private Integer childNumber = null;
+    private boolean isEdit = false;
+    private boolean showSpinner = true;
     private OrgItem changedItem = null;
 
     public static AddTask newInstance(OrgItem item, Org document, Integer childNumber, Boolean isEdit, Boolean showSpinner) {

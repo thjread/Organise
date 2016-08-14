@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                Fragment f = new AddTask();
+                Fragment f = AddTask.newInstance(null, null, null, false, true);
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                 ft.add(f, null);
                 ft.commit();
@@ -240,7 +240,7 @@ public class MainActivity extends AppCompatActivity
                     container, false, false, false);
             views.add(new Pair<>(item, new Pair<>(itemView, (ViewGroup) container)));
             container.addView(itemView);
-            itemView.setOnTouchListener(new OnSwipeTouchListener(itemView.getContext()) {
+            itemView.setOnTouchListener(new OnSwipeTouchListener(itemView.getContext(), itemView, false) {
                 public void onSwipeRight() {
                     item.nextKeyword();
                     item.expandState = 0;

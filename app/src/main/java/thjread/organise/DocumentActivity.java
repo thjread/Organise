@@ -12,10 +12,12 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.google.android.gms.appindexing.Action;
@@ -30,11 +32,6 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
     private ArrayList<OrgItem> listItems;
     private ItemAdapter adapter;
     private ListView listView;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +70,21 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
             listItems.add(item);
         }
 
+        LinearLayout container = (LinearLayout) findViewById(R.id.document_linear_layout);
+        container.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("thjread.organise", "hi");
+            }
+        });
+        container.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                launchItemActionFragment(null);
+                return true;
+            }
+        });
+
         adapter = new ItemAdapter(this, listItems, id, new ItemAdapter.LongTapListener() {
             @Override
             public void onLongTap(OrgItem item) {
@@ -102,9 +114,6 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
                 });
             }
         }
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -121,7 +130,6 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_delete_document) {
             deleteDocument();
             return true;
@@ -191,7 +199,7 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
     }
 
     private void launchItemActionFragment(OrgItem item) {
-        Fragment itemAction = ItemAction.newInstance(item);
+        Fragment itemAction = ItemAction.newInstance(item, org);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(itemAction, null);
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
@@ -210,45 +218,5 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
         }
         return null;
 
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Document Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://thjread.organise/http/host/path")
-        );
-        AppIndex.AppIndexApi.start(client, viewAction);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Document Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://thjread.organise/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(client, viewAction);
-        client.disconnect();
     }
 }

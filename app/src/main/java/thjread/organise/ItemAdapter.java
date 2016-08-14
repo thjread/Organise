@@ -72,7 +72,7 @@ public class ItemAdapter extends ArrayAdapter<OrgItem> {
 
         final ArrayAdapter<OrgItem> adapter = this;
         final View v = convertView;
-        convertView.setOnTouchListener(new OnSwipeTouchListener(convertView.getContext()) {
+        convertView.setOnTouchListener(new OnSwipeTouchListener(convertView.getContext(), convertView, true) {
             public void onSwipeRight() {
                 item.nextKeyword();
                 adapter.notifyDataSetChanged();

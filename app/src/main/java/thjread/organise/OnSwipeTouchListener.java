@@ -1,18 +1,20 @@
 package thjread.organise;
 
 import android.content.Context;
+import android.gesture.Gesture;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 
 //http://stackoverflow.com/questions/4139288/android-how-to-handle-right-to-left-swipe-gestures
 public class OnSwipeTouchListener implements View.OnTouchListener {
 
-    private final GestureDetector gestureDetector;
+    private GestureDetector gestureDetector;
 
-    public OnSwipeTouchListener (Context ctx){
-        gestureDetector = new GestureDetector(ctx, new GestureListener());
+    public OnSwipeTouchListener (Context ctx, View v, boolean longPress){
+        gestureDetector = new GestureDetector(ctx, new GestureListener(v, longPress));
     }
 
     @Override
@@ -25,6 +27,13 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
         private static final int SWIPE_THRESHOLD = 100;
         private static final int SWIPE_VELOCITY_THRESHOLD = 100;
         private boolean startedTap = false;
+        private View view;
+        private boolean longPress;
+
+        public GestureListener(View v, boolean longPress) {
+            this.view = v;
+            this.longPress = longPress;
+        }
 
         @Override
         public boolean onDown(MotionEvent e) {
@@ -77,6 +86,9 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
 
         @Override
         public void onLongPress(MotionEvent e) {
+            if (longPress) {
+                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            }
             onLongTap();
         }
     }

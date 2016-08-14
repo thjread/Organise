@@ -22,8 +22,10 @@ import java.util.List;
 
 public class ItemAction extends DialogFragment {
     private static final String ARG_PATH = "path";
+    private static final String ARG_DOC = "document";
 
-    private OrgItem item;
+    private OrgItem item = null;
+    private Org doc;
 
     public ItemAction() {
         // Required empty public constructor
@@ -36,18 +38,24 @@ public class ItemAction extends DialogFragment {
      * @param item OrgItem
      * @return A new instance of fragment ItemAction.
      */
-    public static ItemAction newInstance(OrgItem item) {
+    public static ItemAction newInstance(OrgItem item, Org doc) {
         ItemAction fragment = new ItemAction();
         Bundle args = new Bundle();
-        ArrayList<String> path = item.getPath();
-        String pathString = "";
-        for (int i=0; i<path.size(); ++i) {
-            pathString += path.get(i);
-            if (i != path.size()-1) {
-                pathString += "/";
+        if (item != null) {
+            ArrayList<String> path = item.getPath();
+            String pathString = "";
+            for (int i = 0; i < path.size(); ++i) {
+                pathString += path.get(i);
+                if (i != path.size() - 1) {
+                    pathString += "/";
+                }
             }
+            args.putString(ARG_PATH, pathString);
         }
-        args.putString(ARG_PATH, pathString);
+        if (doc != null) {
+            String title = doc.title;
+            args.putString(ARG_DOC, title);
+        }
         fragment.setArguments(args);
         return fragment;
     }
@@ -57,8 +65,18 @@ public class ItemAction extends DialogFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             String path_string = getArguments().getString(ARG_PATH);
-            List<String> path = Arrays.asList(path_string.split("/"));
-            item = GlobalState.getFiles().getItem(path);
+            if (path_string != null) {
+                List<String> path = Arrays.asList(path_string.split("/"));
+                item = GlobalState.getFiles().getItem(path);
+            }
+            if (item != null) {
+                doc = item.document;
+            } else {
+                String doc_title = getArguments().getString(ARG_DOC);
+                if (doc_title != null) {
+                    doc = GlobalState.getFiles().getDocument(doc_title);
+                }
+            }
         }
     }
 
@@ -100,11 +118,19 @@ public class ItemAction extends DialogFragment {
             }
         });
 
+        if (item == null) {
+            addSiblingButton.setVisibility(View.GONE);
+            editItemButton.setVisibility(View.GONE);
+            deleteButton.setVisibility(View.GONE);
+
+            addChildButton.setText("Add item");
+        }
+
         return v;
     }
 
     public void addChild() {
-        Fragment f = AddTask.newInstance(item, item.document, null, null, false);
+        Fragment f = AddTask.newInstance(item, doc, null, null, false);
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.remove(this);
         ft.add(f, null);
@@ -120,7 +146,7 @@ public class ItemAction extends DialogFragment {
     }
 
     public void editItem() {
-        Fragment f = AddTask.newInstance(item, item.document, null, true, false);
+        Fragment f = AddTask.newInstance(item, doc, null, true, false);
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.remove(this);
         ft.add(f, null);

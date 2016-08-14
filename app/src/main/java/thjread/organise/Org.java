@@ -175,6 +175,8 @@ public class Org {
     }
 
     public void deleteItem(OrgItem item) {
+        items.remove(item);
+
         OrgItem parent = item.parent;
         ArrayList<OrgItem> children;
         if (parent == null) {

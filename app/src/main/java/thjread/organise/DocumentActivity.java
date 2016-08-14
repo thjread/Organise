@@ -65,12 +65,6 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
         }
 
         LinearLayout container = (LinearLayout) findViewById(R.id.document_linear_layout);
-        container.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("thjread.organise", "hi");
-            }
-        });
         container.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {

@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
+                if (is_syncing) return;
                 Fragment f = AddTask.newInstance(null, null, null, false, true);
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                 ft.add(f, null);
@@ -127,18 +128,6 @@ public class MainActivity extends AppCompatActivity
                 });
             }
         }
-        /*menu.add("Settings").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                launchSettings();
-
-                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-                if (drawer.isDrawerOpen(GravityCompat.START)) {
-                    drawer.closeDrawer(GravityCompat.START);
-                }
-                return true;
-            }
-        });*/
 
         final LinearLayout scheduledContainer = (LinearLayout) findViewById(R.id.scheduledtoday);
         final LinearLayout deadlineContainer = (LinearLayout) findViewById(R.id.deadlinesoon);
@@ -242,7 +231,7 @@ public class MainActivity extends AppCompatActivity
                 public void onSwipeRight() {
                     item.nextKeyword();
                     item.expandState = 0;
-                    ItemView.getView(item, itemView, container, false, false, false);
+                    refreshViews();
                 }
 
                 public void onTap() {
@@ -282,7 +271,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onItemChange(OrgItem item, boolean isEdit, boolean isDelete) {
-        refreshViews();
+        populateViews(GlobalState.getFiles());
     }
 
     private void launchDocumentActivity(View v, OrgItem item, Org document) {

@@ -34,6 +34,10 @@ public class OrgFile {
         File write_dir = context.getDir("write_dir", Context.MODE_PRIVATE);
         f = new File(doc_dir, filePath);
         write_file = new File(write_dir, filePath);
+        if (!f.exists()) {
+            f.getParentFile().mkdirs();
+            f.createNewFile();
+        }
         BufferedReader reader = new BufferedReader(new FileReader(f));
         String str = "";
         while ((str = reader.readLine()) != null) {

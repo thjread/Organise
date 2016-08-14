@@ -58,6 +58,11 @@ public class OrgItem {
         this.parent = parent;
         this.child_number = child_number;
         this.document = document;
+        if (parent == null) {
+            this.treeLevel = 1;
+        } else {
+            this.treeLevel = parent.treeLevel+1;
+        }
     }
     
     public OrgItem(Org.Keyword keywords, String title, Date scheduled,

@@ -104,7 +104,7 @@ public class ItemAction extends DialogFragment {
     }
 
     public void addChild() {
-        Fragment f = AddTask.newInstance(item, null, null);
+        Fragment f = AddTask.newInstance(item, item.document, null, null, false);
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.remove(this);
         ft.add(f, null);
@@ -112,7 +112,7 @@ public class ItemAction extends DialogFragment {
     }
 
     public void addSibling() {
-        Fragment f = AddTask.newInstance(item.parent, item.child_number+1, null);
+        Fragment f = AddTask.newInstance(item.parent, item.document, item.child_number+1, null, false);
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.remove(this);
         ft.add(f, null);
@@ -120,7 +120,7 @@ public class ItemAction extends DialogFragment {
     }
 
     public void editItem() {
-        Fragment f = AddTask.newInstance(item, null, true);
+        Fragment f = AddTask.newInstance(item, item.document, null, true, false);
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.remove(this);
         ft.add(f, null);

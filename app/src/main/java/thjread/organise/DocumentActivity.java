@@ -2,6 +2,7 @@ package thjread.organise;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -17,13 +18,23 @@ import android.view.View;
 import android.view.Window;
 import android.widget.ListView;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class DocumentActivity extends AppCompatActivity implements AddTaskCallbackInterface {
     private Org org;
     private ArrayList<OrgItem> listItems;
     private ItemAdapter adapter;
     private ListView listView;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +68,7 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
 
         org.resetExpanded();
 
-        for (int i=0; i<org.rootItems.size(); ++i) {
+        for (int i = 0; i < org.rootItems.size(); ++i) {
             OrgItem item = org.rootItems.get(i);
             listItems.add(item);
         }
@@ -91,6 +102,9 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
                 });
             }
         }
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -146,18 +160,28 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
         if (!isEdit) {
             int index;
             if (item.child_number == 0) {
-                index = listItems.indexOf(item.parent)+1;
-            } else {
-                if (item.child_number < item.parent.children.size()-1) {
-                    index = listItems.indexOf(item.parent.children.get(item.child_number+1));
+                if (item.parent == null) {
+                    index = 0;
                 } else {
-                    index = listItems.indexOf(item.parent.children.get(item.child_number-1));
-                    while(index < listItems.size() && listItems.get(index).treeLevel >= item.treeLevel) {
+                    index = listItems.indexOf(item.parent) + 1;
+                }
+            } else {
+                List<OrgItem> children;
+                if (item.parent == null) {
+                    children = item.document.rootItems;
+                } else {
+                    children = item.parent.children;
+                }
+                if (item.child_number < children.size() - 1) {
+                    index = listItems.indexOf(children.get(item.child_number + 1));
+                } else {
+                    index = listItems.indexOf(children.get(item.child_number - 1));
+                    while (index < listItems.size() && listItems.get(index).treeLevel >= item.treeLevel) {
                         index++;
                     }
                 }
             }
-            if (item.parent.getExpanded() == 0) {
+            if (item.parent != null && item.parent.getExpanded() == 0) {
                 item.parent.expandState = 1;
             }
             listItems.add(index, item);
@@ -175,7 +199,7 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
     }
 
     private OrgItem expandItemWithId(int id, ArrayList<OrgItem> list) {
-        for (int i=0; i<list.size(); ++i) {
+        for (int i = 0; i < list.size(); ++i) {
             OrgItem item = list.get(i);
             if (item.id == id) {
                 return item;
@@ -188,4 +212,43 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
 
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Document Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://thjread.organise/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Document Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://thjread.organise/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
+    }
 }

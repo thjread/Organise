@@ -1,5 +1,7 @@
 package thjread.organise;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -12,7 +14,9 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -24,6 +28,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import java.io.IOException;
@@ -109,26 +114,33 @@ public class MainActivity extends AppCompatActivity
     public void populateViews(OrgFiles files) {
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         Menu menu = navigationView.getMenu();
-        menu.clear();
+        menu.removeGroup(R.id.document_group);
         for (int i=0; i<files.getFiles().size(); ++i) {
             final Org doc = files.getFiles().get(i);
             if (!doc.file.deleted) {
-                menu.add(doc.title).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                menu.add(R.id.document_group, Menu.NONE, Menu.NONE, doc.title)
+                        .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         GlobalState.setCurrentOrg(doc);
-                        if (doc.rootItems.size() > 1) {
-                            launchDocumentActivity(null, doc.rootItems.get(1));//Avoid colour snap
-                        } else {
-                            launchDocumentActivity(null, doc.rootItems.get(0));
-                        }
+                        launchDocumentActivity(null, null, doc);
                         return true;
                     }
-
-                    ;
                 });
             }
         }
+        /*menu.add("Settings").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                launchSettings();
+
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                if (drawer.isDrawerOpen(GravityCompat.START)) {
+                    drawer.closeDrawer(GravityCompat.START);
+                }
+                return true;
+            }
+        });*/
 
         final LinearLayout scheduledContainer = (LinearLayout) findViewById(R.id.scheduledtoday);
         final LinearLayout deadlineContainer = (LinearLayout) findViewById(R.id.deadlinesoon);
@@ -236,7 +248,7 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 public void onTap() {
-                    launchDocumentActivity(itemView, item);
+                    launchDocumentActivity(itemView, item, item.document);
                 }
             });
         }
@@ -275,15 +287,15 @@ public class MainActivity extends AppCompatActivity
         refreshViews();
     }
 
-    private void launchDocumentActivity(View v, OrgItem item) {
+    private void launchDocumentActivity(View v, OrgItem item, Org document) {
         if (is_syncing) {
             return;
         }
-        GlobalState.setCurrentOrg(item.document);
+        GlobalState.setCurrentOrg(document);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
                 && v != null) {
             v.findViewById(R.id.item_cardview)
-                .setTransitionName(getString(R.string.item_transition));
+                    .setTransitionName(getString(R.string.item_transition));
         }
         Intent i = new Intent(this, DocumentActivity.class);
         Bundle b;
@@ -295,7 +307,9 @@ public class MainActivity extends AppCompatActivity
         } else {
             b = new Bundle();
         }
-        b.putInt("id", item.id);
+        if (item != null) {
+            b.putInt("id", item.id);
+        }
         i.putExtras(b);
         ActivityCompat.startActivity(this, i, b);
 
@@ -331,6 +345,44 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    public void launchSettings() {
+        Intent i = new Intent(this, SettingsActivity.class);
+        ActivityCompat.startActivity(this, i, null);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        }
+    }
+    public void launchSettings(MenuItem item) { launchSettings(); }
+
+    public void newDocument(MenuItem item) {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View view = inflater.inflate(R.layout.new_doc_layout, null);
+        final EditText new_doc_name_text = (EditText) view.findViewById(R.id.new_document_name);
+        final Context context = this;
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle)
+                .setTitle("New document")
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        try {
+                            Org doc = new Org(new OrgFile(new_doc_name_text.getText().toString(), context));
+                            OrgItem orgItem = new OrgItem(doc.keyword, null, null, 0, doc);
+                            orgItem.title = "Add new items here";
+                            doc.addItem(null, orgItem, null);
+                            GlobalState.getFiles().addDocument(doc);
+                            launchDocumentActivity(null, null, doc);
+                        } catch (IOException e) {
+                            Log.d("thjread.organise", e.toString());
+                        }
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .setView(view)
+                .create();
+        dialog.show();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -340,8 +392,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Intent i = new Intent(this, SettingsActivity.class);
-            ActivityCompat.startActivity(this, i, null);
+            launchSettings();
             return true;
         }
 

@@ -31,14 +31,18 @@ public class AddTask extends AppCompatDialogFragment {
     }
 
     private static final String ARG_PATH = "path";
+    private static final String ARG_DOC = "document";
     private static final String ARG_CHILD_NUMBER = "child_number";
     private static final String ARG_IS_EDIT = "is_edit";
+    private static final String ARG_SHOW_SPINNER = "show_spinner";
     private OrgItem item;
+    private Org document;
     private Integer childNumber;
     private boolean isEdit;
+    private boolean showSpinner;
     private OrgItem changedItem = null;
 
-    public static AddTask newInstance(OrgItem item, Integer childNumber, Boolean isEdit) {
+    public static AddTask newInstance(OrgItem item, Org document, Integer childNumber, Boolean isEdit, Boolean showSpinner) {
         AddTask fragment = new AddTask();
         Bundle args = new Bundle();
         if (item != null) {
@@ -52,11 +56,17 @@ public class AddTask extends AppCompatDialogFragment {
             }
             args.putString(ARG_PATH, pathString);
         }
+        if (document != null) {
+            args.putString(ARG_DOC, document.title);
+        }
         if (childNumber != null) {
             args.putInt(ARG_CHILD_NUMBER, childNumber);
         }
         if (isEdit != null) {
             args.putBoolean(ARG_IS_EDIT, isEdit);
+        }
+        if (showSpinner != null) {
+            args.putBoolean(ARG_SHOW_SPINNER, showSpinner);
         }
         fragment.setArguments(args);
         return fragment;
@@ -72,11 +82,16 @@ public class AddTask extends AppCompatDialogFragment {
                 List<String> path = Arrays.asList(path_string.split("/"));
                 item = GlobalState.getFiles().getItem(path);
             }
+            String doc_title = getArguments().getString(ARG_DOC);
+            if (doc_title != null) {
+                document = GlobalState.getFiles().getDocument(doc_title);
+            }
             childNumber = getArguments().getInt(ARG_CHILD_NUMBER, -1);
             if (childNumber == -1) {
                 childNumber = null;
             }
             isEdit = getArguments().getBoolean(ARG_IS_EDIT, false);
+            showSpinner = getArguments().getBoolean(ARG_SHOW_SPINNER, true);
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -90,7 +105,7 @@ public class AddTask extends AppCompatDialogFragment {
         final Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
         spinner.setAdapter(adapter);
 
-        if (item != null) {
+        if (!showSpinner) {
             spinner.setVisibility(View.GONE);
         }
 
@@ -139,9 +154,9 @@ public class AddTask extends AppCompatDialogFragment {
                         } else {
                             OrgItem parent = null;
                             Org doc;
-                            if (item != null) {
+                            if (!showSpinner) {
                                 parent = item;
-                                doc = item.document;
+                                doc = document;
                             } else {
                                 String pathString = (String) spinner.getSelectedItem();
                                 List<String> path = Arrays.asList(pathString.split("/"));

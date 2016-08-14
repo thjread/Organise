@@ -103,7 +103,10 @@ public class OrgFiles {
                 for (int i=0; i<meta.contents.size(); ++i) {
                     String path = meta.contents.get(i).path;
                     String filename = meta.contents.get(i).fileName();
-                    if (filename.substring(filename.length()-4, filename.length()).equals(".bak")) {
+                    if ((filename.length() >= 4 &&
+                            filename.substring(filename.length()-4, filename.length()).equals(".bak"))
+                            || (filename.length() >= 8 &&
+                            filename.substring(filename.length()-8, filename.length()).equals("_archive"))) {
                         continue;
                     }
 
@@ -138,7 +141,8 @@ public class OrgFiles {
                             try {
                                 mDBApi.delete(path);
                             } catch (DropboxException e) {
-                                Log.d("thjread.organise", e.toString());
+                                Log.d("thjread.organise", "Failed to delete file on Dropbox: "
+                                        + e.toString());
                             }
                             files.remove(doc);
                             fileMap.remove(doc.title);
@@ -175,12 +179,6 @@ public class OrgFiles {
                             File file = new File(doc_dir, filename);
                             String path = GlobalState.getDropboxPath() + "/" + filename;
                             FileInputStream inputStream = new FileInputStream(file);
-                            try {
-                                mDBApi.delete(path + ".bak");
-                            } catch (DropboxException e) {
-                                //no backups
-                            }
-                            //mDBApi.move(path, path+".bak");
                             mDBApi.putFile(path, inputStream, file.length(), null, null);
                             inputStream.close();
                             Log.d("thjread.organise", "uploading new file");
@@ -188,7 +186,7 @@ public class OrgFiles {
                     }
                 }
 
-            } catch (Exception e) {//TODO
+            } catch (Exception e) {
                 Log.d("thjread.organise", e.toString());
             }
 

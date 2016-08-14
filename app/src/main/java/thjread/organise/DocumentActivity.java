@@ -9,6 +9,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -25,7 +28,7 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
     private Org org;
     private ArrayList<OrgItem> listItems;
     private ItemAdapter adapter;
-    private ListView listView;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +57,10 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        listView = (ListView) findViewById(R.id.listview);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        recyclerView.setHasFixedSize(true);
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(llm);
         listItems = new ArrayList<>();
 
         org.resetExpanded();
@@ -73,29 +79,36 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
             }
         });
 
+        recyclerView.setLongClickable(true);
+
         adapter = new ItemAdapter(this, listItems, id, new ItemAdapter.LongTapListener() {
             @Override
             public void onLongTap(OrgItem item) {
                 launchItemActionFragment(item);
             }
         });
-        listView.setAdapter(adapter);
+        recyclerView.setAdapter(adapter);
+
+        DefaultItemAnimator animator = new DefaultItemAnimator();
+        animator.setAddDuration(120);
+        animator.setRemoveDuration(120);
+        animator.setChangeDuration(0);
+        recyclerView.setItemAnimator(animator);
 
         if (id != -1) {
             final OrgItem item = expandItemWithId(id, org.rootItems);
             if (item != null) {
-                adapter.notifyDataSetChanged();
                 int pos = adapter.getPosition(item);
                 final Activity thisActivity = this;
-                listView.setSelection(pos);
-                listView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                recyclerView.scrollToPosition(pos);
+                recyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                     @Override
                     public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                             if (adapter.hasSetTransitionName) {
                                 ActivityCompat.startPostponedEnterTransition(thisActivity);
                                 adapter.transitionView.setTransitionName("");
-                                listView.removeOnLayoutChangeListener(this);
+                                recyclerView.removeOnLayoutChangeListener(this);
                             }
                         }
                     }
@@ -146,14 +159,21 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
         super.onResume();
     }
 
+    private void deleteItem(OrgItem item) {
+        if (item.expandState != 0) {
+            for (OrgItem c : item.children) {
+                deleteItem(c);
+            }
+        }
+        adapter.remove(item);
+    }
+
     public void onItemChange(OrgItem item, boolean isEdit, boolean deleted) {
         if (deleted) {
-            listItems.remove(item);
-            adapter.notifyDataSetChanged();
-            return;
-        }
-
-        if (!isEdit) {
+            deleteItem(item);
+        } else if (isEdit) {
+            adapter.notifyItemChanged(adapter.getPosition(item));
+        } else {
             int index;
             if (item.child_number == 0) {
                 if (item.parent == null) {
@@ -180,10 +200,8 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
             if (item.parent != null && item.parent.getExpanded() == 0) {
                 item.parent.expandState = 1;
             }
-            listItems.add(index, item);
+            adapter.add(index, item);
         }
-
-        adapter.notifyDataSetChanged();
     }
 
     private void launchItemActionFragment(OrgItem item) {

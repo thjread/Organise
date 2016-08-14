@@ -1,5 +1,6 @@
 package thjread.organise;
 
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
@@ -97,7 +98,7 @@ public class OrgItem {
         return expandState;
     }
 
-    public void toggleExpanded(List<OrgItem> list, ArrayAdapter<OrgItem> adapter, int position) {
+    public void toggleExpanded(List<OrgItem> list, ItemAdapter adapter, int position) {
         if (expandState == 0) {
             setExpanded(1, list, adapter, position);
             lastClick = System.currentTimeMillis();
@@ -112,23 +113,23 @@ public class OrgItem {
         }
     }
 
-    public void setExpanded(int expand, List<OrgItem> list, ArrayAdapter<OrgItem> adapter, int position) {
-        if (expand == 0) {
+    public void setExpanded(int expand, List<OrgItem> list, ItemAdapter adapter, int position) {
+        if (expand == 0 && expandState != 0) {
             for (int i=0; i<children.size(); ++i) {
                 OrgItem child = children.get(i);
-                child.setExpanded(0, list, adapter, position+i+1);
-                list.remove(child);
+                child.setExpanded(0, list, adapter, position+1);
+                adapter.remove(position+1);
             }
         } else if (expand == 1) {
             if (expandState == 0) {
                 for (int i = 0; i < children.size(); ++i) {
-                    list.add(position+i+1, children.get(i));
+                    adapter.add(position+i+1, children.get(i));
                 }
             }
         } else if (expand == 2) {
             if (expandState == 0) {
                 for (int i = 0; i < children.size(); ++i) {
-                    list.add(position+i+1, children.get(i));
+                    adapter.add(position+i+1, children.get(i));
                 }
             }
             for (int i=0; i<children.size(); ++i) {
@@ -136,8 +137,6 @@ public class OrgItem {
                 child.setExpanded(2, list, adapter, list.indexOf(child));
             }
         }
-
-        adapter.notifyDataSetChanged();
 
         expandState = expand;
     }

@@ -146,6 +146,7 @@ public class MainActivity extends AppCompatActivity
             for (int i = 0; i < org.items.size(); ++i) {
                 boolean added = false;
                 OrgItem item = org.items.get(i);
+                item.expandState = 0;
                 if (item.keywords.keywordType(item.keyword) != Org.Keyword.DONE_KEYWORD_TYPE) {
                     if (item.deadline != null && DateFormatter.days(item.deadline) < 10) {
                         deadlineSoon.add(item);

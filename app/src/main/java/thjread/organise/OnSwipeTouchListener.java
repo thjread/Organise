@@ -1,8 +1,6 @@
 package thjread.organise;
 
 import android.content.Context;
-import android.gesture.Gesture;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;

@@ -1,16 +1,12 @@
 package thjread.organise;
 
 import android.content.Context;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.session.AppKeyPair;
 
-/**
- * Created by tread on 04/08/16.
- */
 public class Dropbox {
     final static String dropbox_token_pref = "DROPBOX_ACCESS_TOKEN_PREF";
 

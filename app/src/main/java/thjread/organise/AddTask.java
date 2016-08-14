@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
-
+import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,8 +20,6 @@ import java.util.Calendar;
 import java.util.List;
 
 public class AddTask extends AppCompatDialogFragment {
-    private List<String> locations;
-
     class FinalBoolean {
         public boolean value;
 
@@ -73,6 +71,7 @@ public class AddTask extends AppCompatDialogFragment {
     }
 
     @Override
+    @NonNull
     public AlertDialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -100,8 +99,8 @@ public class AddTask extends AppCompatDialogFragment {
         view.setPadding(19, 5, 14, 5); //Magic padding values
         builder.setView(view);
 
-        locations = GlobalState.getLocations();
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_spinner_dropdown_item, locations);
+        List<String> locations = GlobalState.getLocations();
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_spinner_dropdown_item, locations);
         final Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
         spinner.setAdapter(adapter);
 
@@ -140,12 +139,12 @@ public class AddTask extends AppCompatDialogFragment {
                     public void onClick(DialogInterface dialog, int id) {
                         if (isEdit) {
                             item.title = titleText.getText().toString();
-                            if (deadlineDateSet.value == true) {
+                            if (deadlineDateSet.value) {
                                 item.deadline = deadlineDate.getTime();
                             } else {
                                 item.deadline = null;
                             }
-                            if (scheduleDateSet.value == true) {
+                            if (scheduleDateSet.value) {
                                 item.scheduled = scheduleDate.getTime();
                             } else {
                                 item.scheduled = null;
@@ -171,10 +170,10 @@ public class AddTask extends AppCompatDialogFragment {
                             }
                             changedItem = new OrgItem(doc.keyword, null, parent, 0, doc);
                             changedItem.title = titleText.getText().toString();
-                            if (deadlineDateSet.value == true) {
+                            if (deadlineDateSet.value) {
                                 changedItem.deadline = deadlineDate.getTime();
                             }
-                            if (scheduleDateSet.value == true) {
+                            if (scheduleDateSet.value) {
                                 changedItem.scheduled = scheduleDate.getTime();
                             }
                             if (parent != null) {
@@ -211,12 +210,12 @@ public class AddTask extends AppCompatDialogFragment {
 
         datePick.setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (dateSet.value == true) {
+                if (dateSet.value) {
                     datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Remove", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             if (which == DialogInterface.BUTTON_NEGATIVE) {
                                 dateSet.value = false;
-                                datePick.setText("None");
+                                datePick.setText(getResources().getString(R.string.none));
                             }
                         }
                     });

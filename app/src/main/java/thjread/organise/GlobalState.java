@@ -38,7 +38,7 @@ public class GlobalState extends Application {
     private static boolean writeLock = false;
 
     public static void getWriteLock() {
-        while (writeLock == true) {}
+        while (writeLock) {}
         writeLock = true;
     }
 

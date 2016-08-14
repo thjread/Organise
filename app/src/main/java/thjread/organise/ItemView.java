@@ -14,9 +14,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-/**
- * Created by tread on 11/06/16.
- */
 public class ItemView {
 
     private static ArrayList<Integer> colors;

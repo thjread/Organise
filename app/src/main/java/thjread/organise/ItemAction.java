@@ -1,15 +1,12 @@
 package thjread.organise;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -123,7 +120,7 @@ public class ItemAction extends DialogFragment {
             editItemButton.setVisibility(View.GONE);
             deleteButton.setVisibility(View.GONE);
 
-            addChildButton.setText("Add item");
+            addChildButton.setText(getResources().getString(R.string.add_item));
         }
 
         return v;

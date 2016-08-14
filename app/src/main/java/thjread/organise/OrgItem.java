@@ -7,8 +7,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class OrgItem {
     String title;
@@ -46,11 +46,11 @@ public class OrgItem {
                    Org document) {
         this.keywords = keywords;
         this.items = items;
-        children = new ArrayList<OrgItem>();
+        children = new ArrayList<>();
         scheduled = null;
         deadline = null;
         closed = null;
-        format = new SimpleDateFormat("yyyy-MM-dd");
+        format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         this.id = id_counter;
         id_counter++;
         all_child_ids = new ArrayList<>();
@@ -63,28 +63,6 @@ public class OrgItem {
         } else {
             this.treeLevel = parent.treeLevel+1;
         }
-    }
-    
-    public OrgItem(Org.Keyword keywords, String title, Date scheduled,
-                   Date deadline, Date closed, int keyword, int treeLevel, ArrayList<OrgItem> items,
-                   OrgItem parent, int child_number, Org document) {
-        this.keywords = keywords;
-        this.title = title;
-        this.scheduled = scheduled;
-        this.deadline = deadline;
-        this.closed = closed;
-        this.keyword = keyword;
-        this.treeLevel = treeLevel;
-        this.items = items;
-        children = new ArrayList<OrgItem>();
-        format = new SimpleDateFormat("yyyy-MM-dd");
-        this.id = id_counter;
-        id_counter++;
-        all_child_ids = new ArrayList<>();
-        all_child_ids.add(this.id);
-        this.parent = parent;
-        this.child_number = child_number;
-        this.document = document;
     }
 
     public ArrayList<String> getPath() {
@@ -249,7 +227,7 @@ public class OrgItem {
             return false;
         }
 
-        if (parseStars(tokens[tokenPointer], true)) {
+        if (parseStars(tokens[tokenPointer])) {
             tokenPointer++;
             if (tokenPointer >= tokens.length) return false;
         } else {
@@ -287,8 +265,8 @@ public class OrgItem {
         int numStars = 0;
 
         char[] chars = stars.toCharArray();
-        for (int i=0; i<chars.length; ++i) {
-            if (chars[i] != '*') {
+        for (char c : chars) {
+            if (c != '*') {
                 return 0;
             }
             numStars++;
@@ -297,14 +275,10 @@ public class OrgItem {
         return numStars;
     }
 
-    private boolean parseStars(String stars, boolean store) {
+    private boolean parseStars(String stars) {
         treeLevel = starNum(stars);
 
-        if (treeLevel == 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return (treeLevel != 0);
     }
 
     private boolean parseKeyword(String keyword) {
@@ -319,11 +293,7 @@ public class OrgItem {
 
     private boolean parsePriority(String priority) {
         char[] chars = priority.toCharArray();
-        if (chars[0] == '#' && chars[1] == '[' && chars[chars.length-1] == ']') {
-            return true;
-        } else {
-            return false;
-        }
+        return (chars[0] == '#' && chars[1] == '[' && chars[chars.length-1] == ']');
     }
 
     private boolean parseSection(String line) {
@@ -383,7 +353,7 @@ public class OrgItem {
                 && tokens[tokenPointer].toCharArray()[0] != '[') {//TODO inactive dates
             return null;
         }
-        ArrayList<String> dateTokens = new ArrayList<String>();
+        ArrayList<String> dateTokens = new ArrayList<>();
         boolean success = false;
         int finalPointer = tokenPointer;
         for (int i=tokenPointer; (!success) && (i<tokens.length); ++i) {
@@ -410,11 +380,11 @@ public class OrgItem {
 
         //TODO times, repeats
 
-        return new Pair<Date, Integer>(d, finalPointer);
+        return new Pair<>(d, finalPointer);
     }
 
     private String formatTimestamp(Date d) {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd EEE");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd EEE", Locale.getDefault());
         return format.format(d);
     }
 }

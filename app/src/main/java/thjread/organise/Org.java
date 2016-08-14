@@ -1,11 +1,6 @@
 package thjread.organise;
 
-import android.util.Log;
-
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 public class Org {

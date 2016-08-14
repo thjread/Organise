@@ -4,9 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-/**
- * Created by tread on 03/08/16.
- */
 public class PrefUtils {
     public static String readPref(Context context, String pref_id, String default_value) {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);

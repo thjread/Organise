@@ -2,21 +2,14 @@ package thjread.organise;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
-import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.CardView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 import java.util.ArrayList;
-
-/**
- * Created by tread on 07/06/16.
- */
 
 public class ItemAdapter extends ArrayAdapter<OrgItem> {
 
@@ -71,7 +64,6 @@ public class ItemAdapter extends ArrayAdapter<OrgItem> {
         }
 
         final ArrayAdapter<OrgItem> adapter = this;
-        final View v = convertView;
         convertView.setOnTouchListener(new OnSwipeTouchListener(convertView.getContext(), convertView, true) {
             public void onSwipeRight() {
                 item.nextKeyword();

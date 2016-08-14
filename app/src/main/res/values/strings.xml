@@ -11,6 +11,9 @@
     <string name="item_transition">item_shared_element_transition_string</string>
     <string name="title_activity_settings">Settings</string>
 
+    <string name="none">None</string>
+    <string name="add_item">Add item</string>
+
     <!-- Strings related to Settings -->
 
     <!-- Example General settings -->

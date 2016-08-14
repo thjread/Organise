@@ -6,12 +6,9 @@ import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -24,8 +21,6 @@ public class OrgFile {
     File write_file;
 
     public boolean deleted = false;
-
-    final static String header = "#written by Organise android app";
 
     public OrgFile(String filePath, Context context) throws IOException {
         file = new ArrayList<>();
@@ -57,7 +52,7 @@ public class OrgFile {
         file = new ArrayList<>();
 
         BufferedReader reader = new BufferedReader(new FileReader(f));
-        String str = "";
+        String str;
         while ((str = reader.readLine()) != null) {
             file.add(str);
         }
@@ -120,7 +115,6 @@ public class OrgFile {
         protected Void doInBackground(Void... params) {
             GlobalState.getWriteLock();
             try {
-                String path = f.getAbsolutePath();
                 f.delete();
                 lastWrite = new Date();
                 write_file.getParentFile().mkdirs();

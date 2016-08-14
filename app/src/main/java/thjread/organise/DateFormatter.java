@@ -1,10 +1,9 @@
 package thjread.organise;
 
-import android.util.Log;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class DateFormatter {
     private static final long ONE_MINUTE = 60 * 1000;
@@ -32,9 +31,7 @@ public class DateFormatter {
         calendarToStartOfDay(now);
         calendarToStartOfDay(date);
         long diff = date.getTimeInMillis() - now.getTimeInMillis();
-        int days = Math.round(diff/ONE_DAY);
-
-        return days;
+        return Math.round(diff/ONE_DAY);
     }
 
     static public String format(Date d, boolean dayStyle) {
@@ -58,10 +55,10 @@ public class DateFormatter {
             if (dayStyle) string += ")";
         } else {
             if (dateFormat == null) {
-                dateFormat = new SimpleDateFormat("EEE d MMM");
+                dateFormat = new SimpleDateFormat("EEE d MMM", Locale.getDefault());
             }
             if (yearDateFormat == null) {
-                yearDateFormat = new SimpleDateFormat("EEE d MMM yyyy");
+                yearDateFormat = new SimpleDateFormat("EEE d MMM yyyy", Locale.getDefault());
             }
 
             string = "";

@@ -40,6 +40,11 @@
                 android:value="thjread.organise.DocumentActivity" />
         </activity>
         <activity
+            android:name=".AddTask"
+            android:label="@string/title_add_task"
+            android:theme="@style/DialogActivity">
+        </activity>
+        <activity
             android:name="com.dropbox.client2.android.AuthActivity"
             android:configChanges="orientation|keyboard"
             android:launchMode="singleTask"

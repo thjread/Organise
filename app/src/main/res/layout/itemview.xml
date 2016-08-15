@@ -41,7 +41,7 @@
                     android:textStyle="bold"
                     android:textSize="15dp"
                     android:autoLink="web"
-                    android:textColorLink="@color/itemview_textcolorlink"/>
+                    android:textColorLink="@color/itemview_textcolor"/>
             </LinearLayout>
 
             <LinearLayout

@@ -133,7 +133,8 @@ public class Org {
 
     public OrgItem getItem(List<String> path, List<OrgItem> list) {
         for (OrgItem item: list) {
-            if (item.title.equals(path.get(0))) {
+            String unique_title = item.title + "###" + Integer.toString(item.id);
+            if (item.title.equals(path.get(0)) || unique_title.equals(path.get(0))) {
                 if (path.size() == 1) {
                     return item;
                 } else {

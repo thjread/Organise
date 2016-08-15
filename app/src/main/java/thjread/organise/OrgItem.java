@@ -75,7 +75,7 @@ public class OrgItem {
             path.add(document.title);
         }
 
-        path.add(title);
+        path.add(title + "###" + Integer.toString(id));
 
         return path;
     }

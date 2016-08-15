@@ -7,7 +7,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Path;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
@@ -32,6 +35,8 @@ public class ItemAction extends AppCompatActivity {
 
     private OrgItem item = null;
     private Org doc;
+
+    private View container;
 
     public ItemAction() {
         // Required empty public constructor
@@ -66,6 +71,10 @@ public class ItemAction extends AppCompatActivity {
         return i;
     }
 
+    private Button addChildButton;
+    private Button addSiblingButton;
+    private Button editItemButton;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,7 +97,7 @@ public class ItemAction extends AppCompatActivity {
 
         setContentView(R.layout.activity_item_action);
 
-        final Button addChildButton = (Button) findViewById(R.id.task_action_add_child);
+        addChildButton = (Button) findViewById(R.id.task_action_add_child);
         addChildButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,7 +105,7 @@ public class ItemAction extends AppCompatActivity {
             }
         });
 
-        final Button addSiblingButton = (Button) findViewById(R.id.task_action_add_sibling);
+        addSiblingButton = (Button) findViewById(R.id.task_action_add_sibling);
         addSiblingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,7 +113,7 @@ public class ItemAction extends AppCompatActivity {
             }
         });
 
-        final Button editItemButton = (Button) findViewById(R.id.task_action_edit_task);
+        editItemButton = (Button) findViewById(R.id.task_action_edit_task);
         editItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -128,9 +137,9 @@ public class ItemAction extends AppCompatActivity {
             addChildButton.setText(getResources().getString(R.string.add_item));
         }
 
-        View v = findViewById(R.id.item_action_container);
+        container = findViewById(R.id.item_action_container);
 
-        v.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+        container.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 if (android.os.Build.VERSION.SDK_INT >= 21) {
@@ -144,7 +153,7 @@ public class ItemAction extends AppCompatActivity {
             }
         });
 
-        v.setOnTouchListener(new View.OnTouchListener() {
+        container.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 finish();
@@ -153,45 +162,66 @@ public class ItemAction extends AppCompatActivity {
         });
     }
 
+    private Bundle setupTransition(Button button) {
+        Bundle b;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            String transitionString = getResources().getString(R.string.add_task_transition);
+            button.setTransitionName(transitionString);
+            ActivityOptionsCompat options =
+                    ActivityOptionsCompat.makeSceneTransitionAnimation(this, button, transitionString);
+            b = options.toBundle();
+        } else {
+            b = new Bundle();
+        }
+        return b;
+    }
+
     public void addChild() {
-        Fragment f = AddTask.newInstance(item, doc, null, null, false);
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.add(f, null);
-        ft.commit();
+        container.setVisibility(View.GONE);
+        Bundle b = setupTransition(addChildButton);
+        Intent i = AddTask.newInstance(this, item, doc, null, null, false);
+        i.putExtras(b);
+        ActivityCompat.startActivityForResult(this, i, ADD_TASK_RESULT, b);
     }
 
     public void addSibling() {
-        Fragment f = AddTask.newInstance(item.parent, item.document, item.child_number+1, null, false);
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.add(f, null);
-        ft.commit();
+        container.setVisibility(View.GONE);
+        Bundle b = setupTransition(addSiblingButton);
+        Intent i = AddTask.newInstance(this, item.parent, item.document, item.child_number+1, null, false);
+        i.putExtras(b);
+        ActivityCompat.startActivityForResult(this, i, ADD_TASK_RESULT, b);
     }
 
     public void editItem() {
-        Fragment f = AddTask.newInstance(item, doc, null, true, false);
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.add(f, null);
-        ft.commit();
+        container.setVisibility(View.GONE);
+        Bundle b = setupTransition(editItemButton);
+        Intent i = AddTask.newInstance(this, item, doc, null, true, false);
+        i.putExtras(b);
+        ActivityCompat.startActivityForResult(this, i, ADD_TASK_RESULT, b);
     }
 
     public void deleteItem() {
+        container.setVisibility(View.GONE);
         if (item != null) {
             AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle)
                     .setTitle("Confirm delete")
                     .setMessage("Delete \"" + item.title + "\"")
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            //item.document.deleteItem(item);
-
                             Intent data = new Intent();
-                            data.putExtra(ARG_ITEM_PATH, item.getPath());
-                            data.putExtra(ARG_IS_EDIT, false);
-                            data.putExtra(ARG_IS_DELETE, true);
+                            data.putExtra(RESULT_ITEM_PATH, item.getPath());
+                            data.putExtra(RESULT_IS_EDIT, false);
+                            data.putExtra(RESULT_IS_DELETE, true);//Lets DocumentActivity actually delete
                             setResult(RESULT_OK, data);
                             finish();
                         }
                     })
-                    .setNegativeButton(android.R.string.cancel, null)
+                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            setResult(RESULT_CANCELED);
+                            finish();
+                        }
+                    })
                     .create();
 
             dialog.show();
@@ -199,7 +229,17 @@ public class ItemAction extends AppCompatActivity {
 
     }
 
-    public static final String ARG_ITEM_PATH = "ITEM_PATH";
-    public static final String ARG_IS_EDIT = "IS_EDIT";
-    public static final String ARG_IS_DELETE = "IS_DELETE";
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == ADD_TASK_RESULT) {
+            setResult(resultCode, data);
+            finish();
+        }
+    }
+
+    private static final int ADD_TASK_RESULT = 1;
+
+    public static final String RESULT_ITEM_PATH = "ITEM_PATH";
+    public static final String RESULT_IS_EDIT = "IS_EDIT";
+    public static final String RESULT_IS_DELETE = "IS_DELETE";
 }

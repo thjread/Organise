@@ -1,15 +1,11 @@
 package thjread.organise;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityManagerCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -23,12 +19,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DocumentActivity extends AppCompatActivity implements AddTaskCallbackInterface {
+public class DocumentActivity extends AppCompatActivity {
     private Org org;
     private ArrayList<OrgItem> listItems;
     private ItemAdapter adapter;
@@ -74,16 +69,15 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
             listItems.add(item);
         }
 
-        LinearLayout container = (LinearLayout) findViewById(R.id.document_linear_layout);
-        container.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                launchItemActionActivity(null);
-                return true;
-            }
-        });
-
-        recyclerView.setLongClickable(true);
+        if (listItems.size() == 0) {
+            recyclerView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    launchItemActionActivity(null);
+                    return true;
+                }
+            });
+        }
 
         adapter = new ItemAdapter(this, listItems, id, new ItemAdapter.LongTapListener() {
             @Override
@@ -176,16 +170,26 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
             }
         }
         adapter.remove(item);
+
+        if (listItems.size() == 0) {
+            recyclerView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    launchItemActionActivity(null);
+                    return true;
+                }
+            });
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ITEM_ACTION_RESULT) {
             if (resultCode == RESULT_OK) {
-                ArrayList<String> path = data.getStringArrayListExtra(ItemAction.ARG_ITEM_PATH);
+                ArrayList<String> path = data.getStringArrayListExtra(ItemAction.RESULT_ITEM_PATH);
                 OrgItem item = GlobalState.getFiles().getItem(path);
-                Boolean isEdit = data.getBooleanExtra(ItemAction.ARG_IS_EDIT, false);
-                Boolean isDelete = data.getBooleanExtra(ItemAction.ARG_IS_DELETE, false);
+                Boolean isEdit = data.getBooleanExtra(ItemAction.RESULT_IS_EDIT, false);
+                Boolean isDelete = data.getBooleanExtra(ItemAction.RESULT_IS_DELETE, false);
                 onItemChange(item, isEdit, isDelete);
 
                 if (isDelete) {
@@ -195,26 +199,15 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
         }
     }
 
-    public void onItemChange(OrgItem item, boolean isEdit, boolean deleted) {
+    private void onItemChange(OrgItem item, boolean isEdit, boolean deleted) {
         if (deleted) {
             deleteItem(item);
         } else if (isEdit) {
             adapter.notifyItemChanged(adapter.getPosition(item));
         } else {
-            int index;
-            if (item.child_number == 0) {
-                if (item.parent == null) {
-                    index = 0;
-                } else {
-                    index = listItems.indexOf(item.parent) + 1;
-                }
-            } else {
-                List<OrgItem> children;
-                if (item.parent == null) {
-                    children = item.document.rootItems;
-                } else {
-                    children = item.parent.children;
-                }
+            if (item.parent == null) {
+                int index;
+                ArrayList<OrgItem> children = item.document.rootItems;
                 if (item.child_number < children.size() - 1) {
                     index = listItems.indexOf(children.get(item.child_number + 1));
                 } else {
@@ -223,18 +216,36 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
                         index++;
                     }
                 }
+                adapter.add(index, item);
+            } else {
+                if (item.parent.expandState == 0) {
+                    item.parent.setExpanded(1, listItems, adapter, listItems.indexOf(item.parent));
+                    adapter.notifyItemChanged(listItems.indexOf(item.parent));
+                } else {
+                    int index;
+                    if (item.child_number == 0) {
+                        index = listItems.indexOf(item.parent) + 1;
+                    } else {
+                        if (item.child_number < item.parent.children.size() - 1) {
+                            index = listItems.indexOf(item.parent.children.get(item.child_number + 1));
+                        } else {
+                            index = listItems.indexOf(item.parent.children.get(item.child_number - 1));
+                            while (index < listItems.size() && listItems.get(index).treeLevel >= item.treeLevel) {
+                                index++;
+                            }
+                        }
+                    }
+                    adapter.add(index, item);
+                }
             }
-            if (item.parent != null && item.parent.getExpanded() == 0) {
-                item.parent.expandState = 1;
-            }
-            adapter.add(index, item);
+
             if (recyclerView.getVisibility() == View.GONE) {
                 recyclerView.setVisibility(View.VISIBLE);
             }
         }
     }
 
-    static final int ITEM_ACTION_RESULT = 1;
+    private static final int ITEM_ACTION_RESULT = 1;
 
     private void launchItemActionActivity(OrgItem item) {
         Intent i = ItemAction.newInstance(this, item, org);

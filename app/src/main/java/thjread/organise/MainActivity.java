@@ -1,5 +1,6 @@
 package thjread.organise;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -39,8 +40,7 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
             SyncFilesCallback,
-            SwipeRefreshLayout.OnRefreshListener,
-            AddTaskCallbackInterface {
+            SwipeRefreshLayout.OnRefreshListener {
 
     private ArrayList<OrgItem> scheduledToday;
     private ArrayList<OrgItem> deadlineSoon;
@@ -65,15 +65,22 @@ public class MainActivity extends AppCompatActivity
         toolbar.setTitle("Upcoming");
         setSupportActionBar(toolbar);
 
+        final Activity activity = this;
         final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 if (is_syncing) return;
-                Fragment f = AddTask.newInstance(null, null, null, false, true);
-                getSupportFragmentManager().beginTransaction()
-                        .addSharedElement(fab, "item_add")
-                        .add(f, null)
-                        .commit();
+                Bundle b;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ActivityOptionsCompat options =
+                            ActivityOptionsCompat.makeSceneTransitionAnimation(activity, fab, getString(R.string.add_task_transition));
+                    b = options.toBundle();
+                } else {
+                    b = new Bundle();
+                }
+                Intent i = AddTask.newInstance(activity, null, null, null, false, true);
+                i.putExtras(b);
+                ActivityCompat.startActivity(activity, i, b);
             }
         });
 
@@ -270,10 +277,6 @@ public class MainActivity extends AppCompatActivity
             item.expandState = 0;
             ItemView.bindViewHolder(item, viewHolder, false, false, false);
         }
-    }
-
-    public void onItemChange(OrgItem item, boolean isEdit, boolean isDelete) {
-        populateViews(GlobalState.getFiles());
     }
 
     private void launchDocumentActivity(View v, OrgItem item, Org document) {

@@ -100,6 +100,7 @@ public class ItemView {
 
         if (keywordType == Org.Keyword.DONE_KEYWORD_TYPE) {
             holder.headline.setTextColor(lightenColor(color, 0.5f));
+            holder.headline.setLinkTextColor(lightenColor(color, 0.5f));
             holder.deadline.setTextColor(lightenColor(color, 0.5f));
             holder.deadlineText.setTextColor(lightenColor(color, 0.5f));
             holder.scheduled.setTextColor(lightenColor(color, 0.5f));
@@ -108,6 +109,7 @@ public class ItemView {
             holder.keyword.setTextColor(ColorUtils.blendARGB(key_color, color, 0.3f));
         } else {
             holder.headline.setTextColor(text_color);
+            holder.headline.setLinkTextColor(text_color);
             holder.deadline.setTextColor(text_color);
             holder.deadlineText.setTextColor(text_color);
             holder.scheduled.setTextColor(text_color);

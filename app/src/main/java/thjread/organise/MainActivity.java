@@ -13,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<OrgItem> deadlineSoon;
     private ArrayList<OrgItem> todos;
 
-    private ArrayList<Pair<OrgItem, Pair<View, ViewGroup>>> views;
+    private ArrayList<Pair<OrgItem, ItemViewHolder>> views;
 
     private SwipeRefreshLayout swipeRefresh;
     private boolean is_syncing = false;
@@ -64,14 +65,15 @@ public class MainActivity extends AppCompatActivity
         toolbar.setTitle("Upcoming");
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 if (is_syncing) return;
                 Fragment f = AddTask.newInstance(null, null, null, false, true);
-                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                ft.add(f, null);
-                ft.commit();
+                getSupportFragmentManager().beginTransaction()
+                        .addSharedElement(fab, "item_add")
+                        .add(f, null)
+                        .commit();
             }
         });
 
@@ -224,9 +226,9 @@ public class MainActivity extends AppCompatActivity
         Collections.sort(items, comparator);
         for (int i=0; i<items.size(); ++i) {
             final OrgItem item = items.get(i);
-            final View itemView = ItemView.getView(item, null,
-                    container, false, false, false);
-            views.add(new Pair<>(item, new Pair<>(itemView, (ViewGroup) container)));
+            ItemViewHolder viewHolder = ItemView.getView(item, container);
+            final View itemView = viewHolder.itemView;
+            views.add(new Pair<>(item, viewHolder));
             container.addView(itemView);
             itemView.setOnTouchListener(new OnSwipeTouchListener(itemView.getContext(), itemView, false) {
                 public void onSwipeRight() {
@@ -262,12 +264,11 @@ public class MainActivity extends AppCompatActivity
         }
 
         for (int i=0; i<views.size(); ++i) {
-            Pair<OrgItem, Pair<View, ViewGroup>> it = views.get(i);
+            Pair<OrgItem, ItemViewHolder> it = views.get(i);
             OrgItem item = it.t;
-            View itemView = it.u.t;
-            ViewGroup container = it.u.u;
+            ItemViewHolder viewHolder = it.u;
             item.expandState = 0;
-            ItemView.getView(item, itemView, container, false, false, false);
+            ItemView.bindViewHolder(item, viewHolder, false, false, false);
         }
     }
 

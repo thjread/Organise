@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.LinearLayout;
@@ -74,7 +75,7 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
         container.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                launchItemActionFragment(null);
+                launchItemActionFragment(null, -1, -1);
                 return true;
             }
         });
@@ -83,8 +84,10 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
 
         adapter = new ItemAdapter(this, listItems, id, new ItemAdapter.LongTapListener() {
             @Override
-            public void onLongTap(OrgItem item) {
-                launchItemActionFragment(item);
+            public void onLongTap(OrgItem item, ItemViewHolder vH, MotionEvent e) {
+                int screenLoc[] = {0, 0};
+                vH.container.getLocationOnScreen(screenLoc);
+                launchItemActionFragment(item, (int) e.getX()+screenLoc[0], (int) e.getY()+screenLoc[1]);
             }
         });
         recyclerView.setAdapter(adapter);
@@ -114,6 +117,10 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
                     }
                 });
             }
+        }
+
+        if (listItems.size() == 0) {
+            recyclerView.setVisibility(View.GONE);
         }
     }
 
@@ -201,11 +208,14 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
                 item.parent.expandState = 1;
             }
             adapter.add(index, item);
+            if (recyclerView.getVisibility() == View.GONE) {
+                recyclerView.setVisibility(View.VISIBLE);
+            }
         }
     }
 
-    private void launchItemActionFragment(OrgItem item) {
-        Fragment itemAction = ItemAction.newInstance(item, org);
+    private void launchItemActionFragment(OrgItem item, int x, int y) {
+        Fragment itemAction = ItemAction.newInstance(item, org, x, y);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(itemAction, null);
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);

@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:id="@+id/item_cardview">
+        android:id="@+id/item_cardview"
+        android:minHeight="40dp">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -38,7 +39,9 @@
                     android:id="@+id/headline"
                     android:textColor="@color/itemview_textcolor"
                     android:textStyle="bold"
-                    android:textSize="15dp"/>
+                    android:textSize="15dp"
+                    android:autoLink="web"
+                    android:textColorLink="@color/itemview_textcolorlink"/>
             </LinearLayout>
 
             <LinearLayout
@@ -70,8 +73,6 @@
                     android:id="@+id/deadline_text"
                     android:textColor="@color/itemview_textcolor"/>
             </LinearLayout>
-
-
         </LinearLayout>
     </android.support.v7.widget.CardView>
 </LinearLayout>

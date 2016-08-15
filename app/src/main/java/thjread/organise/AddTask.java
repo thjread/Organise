@@ -1,12 +1,15 @@
 package thjread.organise;
 
+import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.transition.ChangeBounds;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -49,7 +52,7 @@ public class AddTask extends AppCompatDialogFragment {
             for (int i = 0; i < path.size(); ++i) {
                 pathString += path.get(i);
                 if (i != path.size() - 1) {
-                    pathString += "/";
+                    pathString += "\n";
                 }
             }
             args.putString(ARG_PATH, pathString);
@@ -75,10 +78,14 @@ public class AddTask extends AppCompatDialogFragment {
     public AlertDialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (Build.VERSION.SDK_INT >= 19) {
+            setSharedElementEnterTransition(new ChangeBounds());
+        }
+
         if (getArguments() != null) {
             String path_string = getArguments().getString(ARG_PATH);
             if (path_string != null) {
-                List<String> path = Arrays.asList(path_string.split("/"));
+                List<String> path = Arrays.asList(path_string.split("\n"));
                 item = GlobalState.getFiles().getItem(path);
             }
             String doc_title = getArguments().getString(ARG_DOC);
@@ -158,7 +165,7 @@ public class AddTask extends AppCompatDialogFragment {
                                 doc = document;
                             } else {
                                 String pathString = (String) spinner.getSelectedItem();
-                                List<String> path = Arrays.asList(pathString.split("/"));
+                                List<String> path = Arrays.asList(pathString.split("\n"));
                                 if (path.size() > 1) {
                                     parent = GlobalState.getFiles().getItem(path);
                                 }
@@ -195,7 +202,9 @@ public class AddTask extends AppCompatDialogFragment {
                 });
 
         // Create the AlertDialog object and return it
-        return builder.create();
+        AlertDialog dialog = builder.create();
+        dialog.getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        return dialog;
     }
 
     public void dateSetter(View view, final FinalBoolean dateSet, final Calendar date, final Button datePick) {

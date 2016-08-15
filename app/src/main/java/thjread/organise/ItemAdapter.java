@@ -4,21 +4,20 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.os.Build;
-import android.widget.Space;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 
 public class ItemAdapter extends RecyclerView.Adapter {
 
     public interface LongTapListener {
-        void onLongTap(OrgItem item);
+        void onLongTap(OrgItem item, ItemViewHolder vh, MotionEvent e);
     }
 
     private Integer animateId;
@@ -32,33 +31,6 @@ public class ItemAdapter extends RecyclerView.Adapter {
         this.animateId = animateId;
         this.items = items;
         this.longTapListener = longTapListener;
-    }
-
-    public class ItemViewHolder extends RecyclerView.ViewHolder {
-        public TextView deadline;
-        public TextView deadlineText;
-        public TextView scheduled;
-        public TextView scheduledText;
-        public TextView headline;
-        public TextView keyword;
-        public Space spacer;
-        public Context context;
-        public LinearLayout container;
-        public CardView card_view;
-
-        public ItemViewHolder(View v) {
-            super(v);
-            context = v.getContext();
-            deadline = (TextView) v.findViewById(R.id.deadline);
-            deadlineText = (TextView) v.findViewById(R.id.deadline_text);
-            scheduled = (TextView) v.findViewById(R.id.scheduled);
-            scheduledText = (TextView) v.findViewById(R.id.scheduled_text);
-            spacer = (Space) v.findViewById(R.id.spacer);
-            headline = (TextView) v.findViewById(R.id.headline);
-            keyword = (TextView) v.findViewById(R.id.keyword);
-            container = (LinearLayout) v.findViewById(R.id.item_container);
-            card_view = (CardView) v.findViewById(R.id.item_cardview);
-        }
     }
 
     public void add(int position, OrgItem item) {
@@ -118,7 +90,7 @@ public class ItemAdapter extends RecyclerView.Adapter {
         }
 
         final ItemAdapter adapter = this;
-        holder.container.setOnTouchListener(new OnSwipeTouchListener(holder.context, holder.container, true) {
+        holder.card_view.setOnTouchListener(new OnSwipeTouchListener(holder.context, holder.container, true) {
             public void onSwipeRight() {
                 item.nextKeyword();
                 notifyItemChanged(holder.getAdapterPosition());
@@ -126,11 +98,15 @@ public class ItemAdapter extends RecyclerView.Adapter {
 
             public void onTap() {
                 item.toggleExpanded(items, adapter, holder.getAdapterPosition());
-                notifyItemChanged(holder.getAdapterPosition());
+                String title = item.title;
+                if (!item.children.isEmpty() && item.expandState == 0) {
+                    title += " ...";
+                }
+                holder.headline.setText(title);// Using notifyItemChanged breaks animation
             }
 
-            public void onLongTap() {
-                longTapListener.onLongTap(item);
+            public void onLongTap(MotionEvent e) {
+                longTapListener.onLongTap(item, holder, e);
             }
         });
     }

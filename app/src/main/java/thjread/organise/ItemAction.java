@@ -1,14 +1,22 @@
 package thjread.organise;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.Path;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.widget.Button;
 
@@ -20,9 +28,14 @@ import java.util.List;
 public class ItemAction extends DialogFragment {
     private static final String ARG_PATH = "path";
     private static final String ARG_DOC = "document";
+    private static final String ARG_X = "x";
+    private static final String ARG_Y = "y";
 
     private OrgItem item = null;
     private Org doc;
+
+    private int x;
+    private int y;
 
     public ItemAction() {
         // Required empty public constructor
@@ -35,7 +48,7 @@ public class ItemAction extends DialogFragment {
      * @param item OrgItem
      * @return A new instance of fragment ItemAction.
      */
-    public static ItemAction newInstance(OrgItem item, Org doc) {
+    public static ItemAction newInstance(OrgItem item, Org doc, int x, int y) {
         ItemAction fragment = new ItemAction();
         Bundle args = new Bundle();
         if (item != null) {
@@ -44,7 +57,7 @@ public class ItemAction extends DialogFragment {
             for (int i = 0; i < path.size(); ++i) {
                 pathString += path.get(i);
                 if (i != path.size() - 1) {
-                    pathString += "/";
+                    pathString += "\n";
                 }
             }
             args.putString(ARG_PATH, pathString);
@@ -53,6 +66,8 @@ public class ItemAction extends DialogFragment {
             String title = doc.title;
             args.putString(ARG_DOC, title);
         }
+        args.putInt(ARG_X, x);
+        args.putInt(ARG_Y, y);
         fragment.setArguments(args);
         return fragment;
     }
@@ -60,21 +75,30 @@ public class ItemAction extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            String path_string = getArguments().getString(ARG_PATH);
+        Bundle args = getArguments();
+        if (args != null) {
+            String path_string = args.getString(ARG_PATH);
             if (path_string != null) {
-                List<String> path = Arrays.asList(path_string.split("/"));
+                List<String> path = Arrays.asList(path_string.split("\n"));
                 item = GlobalState.getFiles().getItem(path);
             }
             if (item != null) {
                 doc = item.document;
             } else {
-                String doc_title = getArguments().getString(ARG_DOC);
+                String doc_title = args.getString(ARG_DOC);
                 if (doc_title != null) {
                     doc = GlobalState.getFiles().getDocument(doc_title);
                 }
             }
+            x = args.getInt(ARG_X);
+            y = args.getInt(ARG_Y);
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     }
 
     @Override
@@ -121,6 +145,32 @@ public class ItemAction extends DialogFragment {
             deleteButton.setVisibility(View.GONE);
 
             addChildButton.setText(getResources().getString(R.string.add_item));
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= 21) {
+            v.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    if (android.os.Build.VERSION.SDK_INT >= 21) {
+                        int width = v.getWidth();
+                        int height = v.getHeight();
+                        float finalRadius = (float) Math.hypot(width, height) / 2.0f;
+                        Animator anim = ViewAnimationUtils.createCircularReveal(v, width/2, height/2, 0, finalRadius);
+                        anim.start();
+
+                        if (x >= 0) {// set to -1 to disable animation
+                            Path path = new Path();
+                            int screenPos[] = {0, 0};
+                            v.getLocationOnScreen(screenPos);
+                            path.moveTo(x - screenPos[0], y - screenPos[1]);
+                            path.lineTo(left, top);
+                            ObjectAnimator mAnimator = ObjectAnimator.ofFloat(v, v.X, v.Y, path);
+                            mAnimator.start();
+                        }
+                    }
+                    v.removeOnLayoutChangeListener(this);
+                }
+            });
         }
 
         return v;

@@ -87,7 +87,7 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
             if (longPress) {
                 view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             }
-            onLongTap();
+            onLongTap(e);
         }
     }
 
@@ -103,7 +103,7 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
     public void onSwipeBottom() {
     }
 
-    public void onLongTap() {
+    public void onLongTap(MotionEvent e) {
     }
 
     public void onTap() {

@@ -37,7 +37,7 @@ public class OrgItem {
 
     private long lastClick = 0;
 
-    static final int DOUBLE_TAP_TIME = 500;
+    static final int DOUBLE_TAP_TIME = 800;
 
     ArrayList<OrgItem> items;
 

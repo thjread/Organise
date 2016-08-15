@@ -10,7 +10,9 @@
         android:orientation="vertical"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
-        android:paddingTop="8dp">
+        android:paddingTop="8dp"
+        android:transitionName="item_add"
+        android:id="@+id/add_task_container">
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

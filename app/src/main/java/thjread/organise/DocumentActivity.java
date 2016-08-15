@@ -1,10 +1,13 @@
 package thjread.organise;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityManagerCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
@@ -75,7 +78,7 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
         container.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                launchItemActionFragment(null, -1, -1);
+                launchItemActionActivity(null);
                 return true;
             }
         });
@@ -87,7 +90,7 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
             public void onLongTap(OrgItem item, ItemViewHolder vH, MotionEvent e) {
                 int screenLoc[] = {0, 0};
                 vH.container.getLocationOnScreen(screenLoc);
-                launchItemActionFragment(item, (int) e.getX()+screenLoc[0], (int) e.getY()+screenLoc[1]);
+                launchItemActionActivity(item);
             }
         });
         recyclerView.setAdapter(adapter);
@@ -175,6 +178,23 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
         adapter.remove(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == ITEM_ACTION_RESULT) {
+            if (resultCode == RESULT_OK) {
+                ArrayList<String> path = data.getStringArrayListExtra(ItemAction.ARG_ITEM_PATH);
+                OrgItem item = GlobalState.getFiles().getItem(path);
+                Boolean isEdit = data.getBooleanExtra(ItemAction.ARG_IS_EDIT, false);
+                Boolean isDelete = data.getBooleanExtra(ItemAction.ARG_IS_DELETE, false);
+                onItemChange(item, isEdit, isDelete);
+
+                if (isDelete) {
+                    item.document.deleteItem(item);
+                }
+            }
+        }
+    }
+
     public void onItemChange(OrgItem item, boolean isEdit, boolean deleted) {
         if (deleted) {
             deleteItem(item);
@@ -214,12 +234,11 @@ public class DocumentActivity extends AppCompatActivity implements AddTaskCallba
         }
     }
 
-    private void launchItemActionFragment(OrgItem item, int x, int y) {
-        Fragment itemAction = ItemAction.newInstance(item, org, x, y);
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.add(itemAction, null);
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        ft.commit();
+    static final int ITEM_ACTION_RESULT = 1;
+
+    private void launchItemActionActivity(OrgItem item) {
+        Intent i = ItemAction.newInstance(this, item, org);
+        startActivityForResult(i, ITEM_ACTION_RESULT);
     }
 
     private OrgItem expandItemWithId(int id, ArrayList<OrgItem> list) {

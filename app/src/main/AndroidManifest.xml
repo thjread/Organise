@@ -31,6 +31,15 @@
                 android:value="thjread.organise.MainActivity" />
         </activity>
         <activity
+            android:name=".ItemAction"
+            android:label="@string/title_item_action"
+            android:parentActivityName=".DocumentActivity"
+            android:theme="@style/DialogActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="thjread.organise.DocumentActivity" />
+        </activity>
+        <activity
             android:name="com.dropbox.client2.android.AuthActivity"
             android:configChanges="orientation|keyboard"
             android:launchMode="singleTask"

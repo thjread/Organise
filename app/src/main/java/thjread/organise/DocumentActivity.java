@@ -220,7 +220,6 @@ public class DocumentActivity extends AppCompatActivity {
             } else {
                 if (item.parent.expandState == 0) {
                     item.parent.setExpanded(1, listItems, adapter, listItems.indexOf(item.parent));
-                    adapter.notifyItemChanged(listItems.indexOf(item.parent));
                 } else {
                     int index;
                     if (item.child_number == 0) {

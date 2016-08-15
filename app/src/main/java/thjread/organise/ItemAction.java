@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -15,6 +16,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -153,9 +155,18 @@ public class ItemAction extends AppCompatActivity {
             }
         });
 
+        final CardView cardView = (CardView) findViewById(R.id.item_action_cardview);
+
         container.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            public boolean onTouch(View v, MotionEvent e) {
+                int location[] = {0, 0};
+                cardView.getLocationOnScreen(location);
+                Rect rect = new Rect(location[0], location[1],
+                        location[0]+cardView.getWidth(), location[1]+cardView.getHeight());
+                if (rect.contains((int) e.getX(), (int) e.getY())) {
+                    return false;
+                }
                 finish();
                 return true;
             }

@@ -5,7 +5,11 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Intent;
 import android.app.DatePickerDialog;
+import android.graphics.Rect;
+import android.inputmethodservice.Keyboard;
 import android.os.Build;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -84,9 +88,15 @@ public class AddTask extends AppCompatActivity {
     }
 
     private boolean runAnimation = false;
+    private View container;
+    private Integer initialHeightDiff = null;
 
     public void onResume() {
         super.onResume();
+
+        if (initialHeightDiff == null) {
+            initialHeightDiff = container.getRootView().getHeight() - container.getHeight();
+        }
 
         if (runAnimation) {
             if (Build.VERSION.SDK_INT >= 21) {
@@ -250,11 +260,19 @@ public class AddTask extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.add_task_container).setOnTouchListener(new View.OnTouchListener() {
+        container = findViewById(R.id.add_task_container);
+        container.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent e) {
-                finish();
-                return true;
+                int location[] = {0, 0};
+                cardView.getLocationOnScreen(location);
+                Rect rect = new Rect(location[0], location[1],
+                        location[0]+cardView.getWidth(), location[1]+cardView.getHeight());
+                if (!rect.contains((int) e.getX(), (int) e.getY())) {
+                    setResult(RESULT_CANCELED);
+                    finish();
+                }
+                return false;
             }
         });
 

@@ -1,5 +1,7 @@
 package thjread.organise;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
@@ -100,6 +102,8 @@ public class AddTask extends AppCompatActivity {
 
         if (runAnimation) {
             if (Build.VERSION.SDK_INT >= 21) {
+                cardView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
                 ValueAnimator anim = new ValueAnimator();
                 anim.setIntValues(getResources().getColor(R.color.colorAccent),
                         getResources().getColor(R.color.card_background));
@@ -109,6 +113,12 @@ public class AddTask extends AppCompatActivity {
                     public void onAnimationUpdate(ValueAnimator animation) {
                         int color = (Integer) animation.getAnimatedValue();
                         cardView.setBackgroundColor(color);
+                    }
+                });
+                anim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        cardView.setLayerType(View.LAYER_TYPE_NONE, null);
                     }
                 });
                 anim.setDuration(125);
@@ -213,9 +223,9 @@ public class AddTask extends AppCompatActivity {
                         doc = document;
                     } else {
                         String pathString = (String) spinner.getSelectedItem();
-                        List<String> path = Arrays.asList(pathString.split("\n"));
+                        List<String> path = Arrays.asList(pathString.split("/"));
                         if (path.size() > 1) {
-                            parent = GlobalState.getFiles().getItem(path);
+                            parent = GlobalState.getFiles().getItem(path);//TODO error handling
                         }
                         if (parent != null) {
                             doc = parent.document;

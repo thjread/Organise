@@ -349,6 +349,9 @@ public class MainActivity extends AppCompatActivity
     public void launchSettings(MenuItem item) { launchSettings(); }
 
     public void newDocument(MenuItem item) {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.new_doc_layout, null);
         final EditText new_doc_name_text = (EditText) view.findViewById(R.id.new_document_name);

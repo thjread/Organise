@@ -37,7 +37,7 @@ public class OrgItem {
 
     private long lastClick = 0;
 
-    static final int DOUBLE_TAP_TIME = 800;
+    static final int DOUBLE_TAP_TIME = 500;
 
     ArrayList<OrgItem> items;
 
@@ -129,7 +129,8 @@ public class OrgItem {
         } else if (expand == 2) {
             if (expandState == 0) {
                 for (int i = 0; i < children.size(); ++i) {
-                    adapter.add(position+i+1, children.get(i));
+                    OrgItem child = children.get(i);
+                    adapter.add(position+i+1, child);
                 }
             }
             for (int i=0; i<children.size(); ++i) {

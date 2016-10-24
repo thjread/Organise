@@ -149,8 +149,9 @@ public class OrgFiles {
                             } catch (DropboxException e) {
                                 //no backups
                             }
+                            mDBApi.putFile(path + ".new", inputStream, file.length(), null, null);
                             mDBApi.move(path, path + ".bak");
-                            mDBApi.putFile(path, inputStream, file.length(), null, null);
+                            mDBApi.move(path + ".new", path);
                             inputStream.close();
                         }
                     } else {

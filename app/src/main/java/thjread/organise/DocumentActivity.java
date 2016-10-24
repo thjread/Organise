@@ -202,6 +202,9 @@ public class DocumentActivity extends AppCompatActivity {
     private void onItemChange(OrgItem item, boolean isEdit, boolean deleted) {
         if (deleted) {
             deleteItem(item);
+            if (item.parent != null) {
+                adapter.notifyItemChanged(adapter.getPosition(item.parent));
+            }
         } else if (isEdit) {
             adapter.notifyItemChanged(adapter.getPosition(item));
         } else {
@@ -235,6 +238,10 @@ public class DocumentActivity extends AppCompatActivity {
                         }
                     }
                     adapter.add(index, item);
+                }
+
+                if (item.parent.children.size() == 1) {
+                    adapter.notifyItemChanged(adapter.getPosition(item.parent));
                 }
             }
 

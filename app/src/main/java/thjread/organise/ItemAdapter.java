@@ -1,5 +1,7 @@
 package thjread.organise;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -69,6 +71,7 @@ public class ItemAdapter extends RecyclerView.Adapter {
                     holder.card_view.setTransitionName(holder.context.getString(R.string.item_transition));
                     hasSetTransitionName = true;
                     transitionView = holder.card_view;
+                    holder.card_view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
                     ValueAnimator anim = new ValueAnimator();
                     boolean isDone = item.keywords.keywordType(item.keyword) == Org.Keyword.DONE_KEYWORD_TYPE;
                     anim.setIntValues(ItemView.getColor(item, false, false, isDone),
@@ -82,6 +85,12 @@ public class ItemAdapter extends RecyclerView.Adapter {
                         }
                     });
                     anim.setDuration(350);
+                    anim.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            holder.card_view.setLayerType(View.LAYER_TYPE_NONE, null);
+                        }
+                    });
                     anim.start();
                 } else {
                     holder.card_view.setTransitionName("");
@@ -98,11 +107,15 @@ public class ItemAdapter extends RecyclerView.Adapter {
 
             public void onTap() {
                 item.toggleExpanded(items, adapter, holder.getAdapterPosition());
-                String title = item.title;
-                if (!item.children.isEmpty() && item.expandState == 0) {
-                    title += " ...";
-                }
-                holder.headline.setText(title);// Using notifyItemChanged breaks animation
+                if (item.expandState != 0) {
+                    notifyItemChanged(getPosition(item));//breaks animation for fold but fixes double tap
+                }/* else {
+                    String title = item.title;
+                    if (!item.children.isEmpty() && item.expandState == 0) {
+                        title += " ...";
+                    }
+                    holder.headline.setText(title);// Using notifyItemChanged breaks animation
+                }*/
             }
 
             public void onLongTap(MotionEvent e) {
